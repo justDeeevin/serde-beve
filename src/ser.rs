@@ -14,6 +14,15 @@ impl<'ser, W: Write> Serializer<'ser, W> {
     pub fn new(writer: &'ser mut W) -> Self {
         Self { writer }
     }
+
+    fn serialize_str_value(&mut self, bytes: std::str::Bytes<'_>) -> Result<(), Error> {
+        self.writer.write_all(
+            &bytes
+                .flat_map(|byte| byte.to_le_bytes())
+                .collect::<Vec<_>>(),
+        )?;
+        Ok(())
+    }
 }
 
 impl<'ser, W: Write> serde::Serializer for &mut Serializer<'ser, W> {
@@ -130,13 +139,7 @@ impl<'ser, W: Write> serde::Serializer for &mut Serializer<'ser, W> {
         let bytes = v.bytes();
         self.writer.write_all(&[STRING])?;
         self.writer.write_all(&bytes.len().to_le_bytes())?;
-        self.writer.write_all(
-            &bytes
-                .flat_map(|byte| byte.to_le_bytes())
-                .collect::<Vec<_>>(),
-        )?;
-
-        Ok(())
+        self.serialize_str_value(bytes)
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
@@ -261,7 +264,7 @@ impl<'ser, W: Write> serde::Serializer for &mut Serializer<'ser, W> {
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         self.serialize_struct(name, 1)?;
-        self.serialize_str(variant)?;
+        self.serialize_str_value(variant.bytes())?;
         self.serialize_struct("", len)
     }
 }
@@ -290,8 +293,7 @@ impl<'a, W: Write> SerializeStruct for &mut Serializer<'a, W> {
     where
         T: ?Sized + serde::Serialize,
     {
-        use serde::Serializer;
-        self.serialize_str(key)?;
+        self.serialize_str_value(key.bytes())?;
         value.serialize(&mut **self)
     }
 
@@ -571,9 +573,7 @@ impl<'a, W: Write> SerializeStructVariant for &mut Serializer<'a, W> {
     where
         T: ?Sized + serde::Serialize,
     {
-        use serde::Serializer;
-
-        self.serialize_str(key)?;
+        self.serialize_str_value(key.bytes())?;
         value.serialize(&mut **self)
     }
 
