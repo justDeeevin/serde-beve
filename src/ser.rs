@@ -3,7 +3,7 @@ use serde::ser::{
     SerializeTupleStruct, SerializeTupleVariant,
 };
 
-use crate::error::Error;
+use crate::{error::Error, headers::*};
 use std::io::Write;
 
 pub struct Serializer<'a, W: Write> {
@@ -30,93 +30,93 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         if v {
-            self.writer.write_all(&[0b00011000])?;
+            self.writer.write_all(&[TRUE])?;
         } else {
-            self.writer.write_all(&[0b00001000])?;
+            self.writer.write_all(&[FALSE])?;
         }
 
         Ok(())
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b00001001])?;
+        self.writer.write_all(&[I8])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b00101001])?;
+        self.writer.write_all(&[I16])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01001001])?;
+        self.writer.write_all(&[I32])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01101001])?;
+        self.writer.write_all(&[I64])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b10001001])?;
+        self.writer.write_all(&[I128])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b00010001])?;
+        self.writer.write_all(&[U8])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b00110001])?;
+        self.writer.write_all(&[U16])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01010001])?;
+        self.writer.write_all(&[U32])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01110001])?;
+        self.writer.write_all(&[U64])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b10010001])?;
+        self.writer.write_all(&[U128])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01000001])?;
+        self.writer.write_all(&[F32])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b01100001])?;
+        self.writer.write_all(&[F64])?;
         self.writer.write_all(&v.to_le_bytes())?;
 
         Ok(())
@@ -127,8 +127,8 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0b00000010])?;
         self.writer.write_all(&v.len().to_le_bytes())?;
+        self.writer.write_all(&[STRING])?;
         self.writer.write_all(
             &v.as_bytes()
                 .iter()
@@ -160,7 +160,7 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        self.writer.write_all(&[0])?;
+        self.writer.write_all(&[NULL])?;
         Ok(())
     }
 
@@ -207,7 +207,7 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
         let Some(len) = len else {
             return Err(Error::MissingLength);
         };
-        self.writer.write_all(&[0b00000101])?;
+        self.writer.write_all(&[GENERIC_ARRAY])?;
         self.writer.write_all(&len.to_le_bytes())?;
         Ok(self)
     }
@@ -249,7 +249,7 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
         _name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        self.writer.write_all(&[0b00000011])?;
+        self.writer.write_all(&[OBJECT])?;
         self.writer.write_all(&len.to_le_bytes())?;
         Ok(self)
     }
