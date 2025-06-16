@@ -21,6 +21,8 @@ pub const U64: u8 = 0b01110001;
 pub const U128: u8 = 0b10010001;
 
 pub const STRING: u8 = 0b00000010;
-pub const OBJECT: u8 = 0b00000011;
+pub const STRING_OBJECT: u8 = 0b00000011;
+pub const INT_OBJECT: u8 = 0b00001011;
+pub const UINT_OBJECT: u8 = 0b00010011;
 pub const TYPED_ARRAY: u8 = 0b00000100;
 pub const GENERIC_ARRAY: u8 = 0b00000101;

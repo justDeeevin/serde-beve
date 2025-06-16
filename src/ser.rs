@@ -248,7 +248,7 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
         _name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        self.writer.write_all(&[OBJECT])?;
+        self.writer.write_all(&[STRING_OBJECT])?;
         self.writer.write_all(&len.to_le_bytes())?;
         Ok(self)
     }
