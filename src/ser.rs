@@ -19,11 +19,7 @@ impl<'ser, W: Write> Serializer<'ser, W> {
     }
 
     fn serialize_str_value(&mut self, bytes: std::str::Bytes<'_>) -> Result<(), Error> {
-        self.writer.write_all(
-            &bytes
-                .flat_map(|byte| byte.to_le_bytes())
-                .collect::<Vec<_>>(),
-        )?;
+        self.writer.write_all(&bytes.collect::<Vec<_>>())?;
         Ok(())
     }
 }
@@ -87,7 +83,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         self.writer.write_all(&[U8])?;
-        self.writer.write_all(&v.to_le_bytes())?;
+        self.writer.write_all(&[v])?;
 
         Ok(())
     }
@@ -147,9 +143,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
         self.writer.write_all(&[U8_ARRAY])?;
-        for byte in v {
-            self.writer.write_all(&byte.to_le_bytes())?;
-        }
+        self.writer.write_all(v)?;
         Ok(())
     }
 
