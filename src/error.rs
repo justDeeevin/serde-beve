@@ -1,3 +1,5 @@
+use crate::ser::KeyType;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
@@ -12,6 +14,8 @@ pub enum Error {
     MissingLength,
     #[error("Keys must be strings or integers")]
     InvalidKey,
+    #[error("Mismatched key types. Expected {expected}, found {found}.")]
+    MismatchedKeyType { expected: KeyType, found: KeyType },
 }
 
 impl serde::ser::Error for Error {
