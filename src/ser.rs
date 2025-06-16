@@ -6,17 +6,17 @@ use serde::ser::{
 use crate::{error::Error, headers::*};
 use std::io::Write;
 
-pub struct Serializer<'a, W: Write> {
-    writer: &'a mut W,
+pub struct Serializer<'ser, W: Write> {
+    writer: &'ser mut W,
 }
 
-impl<'a, W: Write> Serializer<'a, W> {
-    pub fn new(writer: &'a mut W) -> Self {
+impl<'ser, W: Write> Serializer<'ser, W> {
+    pub fn new(writer: &'ser mut W) -> Self {
         Self { writer }
     }
 }
 
-impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
+impl<'ser, W: Write> serde::Serializer for &mut Serializer<'ser, W> {
     type Ok = ();
     type Error = Error;
 
