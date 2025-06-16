@@ -16,6 +16,8 @@ pub enum Error {
     InvalidKey,
     #[error("Mismatched key types. Expected {expected}, found {found}.")]
     MismatchedKeyType { expected: KeyType, found: KeyType },
+    #[error("Object, array, or string too long")]
+    TooLong,
 }
 
 impl serde::ser::Error for Error {

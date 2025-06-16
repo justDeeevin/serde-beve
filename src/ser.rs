@@ -22,6 +22,26 @@ impl<'ser, W: Write> Serializer<'ser, W> {
         self.writer.write_all(&bytes.collect::<Vec<_>>())?;
         Ok(())
     }
+
+    fn serialize_size(&mut self, mut size: usize) -> Result<(), Error> {
+        if size >= 2_usize.pow(62) {
+            return Err(Error::TooLong);
+        }
+
+        size <<= 2;
+
+        if size < 2_usize.pow(6) {
+            self.writer.write_all(&[size as u8])?;
+        } else if size < 2_usize.pow(14) {
+            self.writer.write_all(&(size as u16 | 1).to_le_bytes())?;
+        } else if size < 2_usize.pow(30) {
+            self.writer.write_all(&(size as u32 | 2).to_le_bytes())?;
+        } else {
+            self.writer.write_all(&(size as u64 | 3).to_le_bytes())?;
+        }
+
+        Ok(())
+    }
 }
 
 impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
@@ -137,12 +157,13 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
         let bytes = v.bytes();
         self.writer.write_all(&[STRING])?;
-        self.writer.write_all(&bytes.len().to_le_bytes())?;
+        self.serialize_size(bytes.len())?;
         self.serialize_str_value(bytes)
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
         self.writer.write_all(&[U8_ARRAY])?;
+        self.serialize_size(v.len())?;
         self.writer.write_all(v)?;
         Ok(())
     }
@@ -207,7 +228,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
             return Err(Error::MissingLength);
         };
         self.writer.write_all(&[GENERIC_ARRAY])?;
-        self.writer.write_all(&len.to_le_bytes())?;
+        self.serialize_size(len)?;
         Ok(self)
     }
 
@@ -397,7 +418,7 @@ impl<'a, 'ser, W: Write> MapSerializer<'a, 'ser, W> {
     pub fn set_key_type(&mut self, key_type: KeyType) -> Result<(), Error> {
         self.key_type = Some(key_type);
         self.serializer.writer.write_all(&[key_type.header()])?;
-        self.serializer.writer.write_all(&self.len.to_le_bytes())?;
+        self.serializer.serialize_size(self.len)?;
         Ok(())
     }
 }
