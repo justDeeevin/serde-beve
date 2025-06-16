@@ -6,17 +6,17 @@ use serde::ser::{
 use crate::error::Error;
 use std::io::Write;
 
-pub struct Serializer<W: Write> {
-    writer: W,
+pub struct Serializer<'a, W: Write> {
+    writer: &'a mut W,
 }
 
-impl<W: Write> Serializer<W> {
-    pub fn new(writer: W) -> Self {
+impl<'a, W: Write> Serializer<'a, W> {
+    pub fn new(writer: &'a mut W) -> Self {
         Self { writer }
     }
 }
 
-impl<W: Write> serde::Serializer for &mut Serializer<W> {
+impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -267,7 +267,7 @@ impl<W: Write> serde::Serializer for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeSeq for &mut Serializer<W> {
+impl<'a, W: Write> SerializeSeq for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -283,7 +283,7 @@ impl<W: Write> SerializeSeq for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeStruct for &mut Serializer<W> {
+impl<'a, W: Write> SerializeStruct for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -301,7 +301,7 @@ impl<W: Write> SerializeStruct for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeTuple for &mut Serializer<W> {
+impl<'a, W: Write> SerializeTuple for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -317,7 +317,7 @@ impl<W: Write> SerializeTuple for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeTupleStruct for &mut Serializer<W> {
+impl<'a, W: Write> SerializeTupleStruct for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -333,7 +333,7 @@ impl<W: Write> SerializeTupleStruct for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeTupleVariant for &mut Serializer<W> {
+impl<'a, W: Write> SerializeTupleVariant for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -349,7 +349,7 @@ impl<W: Write> SerializeTupleVariant for &mut Serializer<W> {
     }
 }
 
-impl<W: Write> SerializeMap for &mut Serializer<W> {
+impl<'a, W: Write> SerializeMap for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
@@ -381,13 +381,13 @@ impl<W: Write> SerializeMap for &mut Serializer<W> {
     }
 }
 
-struct KeySerializer<'a, W: Write> {
-    serializer: &'a mut Serializer<W>,
+struct KeySerializer<'a, 'b, W: Write> {
+    serializer: &'a mut Serializer<'b, W>,
 }
 
 type Impossible = serde::ser::Impossible<(), Error>;
 
-impl<'a, W: Write> serde::Serializer for KeySerializer<'a, W> {
+impl<'a, 'b, W: Write> serde::Serializer for KeySerializer<'a, 'b, W> {
     type Ok = ();
     type Error = Error;
 
@@ -564,7 +564,7 @@ impl<'a, W: Write> serde::Serializer for KeySerializer<'a, W> {
     }
 }
 
-impl<W: Write> SerializeStructVariant for &mut Serializer<W> {
+impl<'a, W: Write> SerializeStructVariant for &mut Serializer<'a, W> {
     type Ok = ();
     type Error = Error;
 
