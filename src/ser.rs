@@ -140,11 +140,11 @@ impl<'ser, W: Write> serde::Serializer for &mut Serializer<'ser, W> {
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        let mut seq = self.serialize_seq(Some(v.len()))?;
+        self.writer.write_all(&[U8_ARRAY])?;
         for byte in v {
-            SerializeSeq::serialize_element(&mut seq, byte)?;
+            self.writer.write_all(&byte.to_le_bytes())?;
         }
-        SerializeSeq::end(seq)
+        Ok(())
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
