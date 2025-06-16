@@ -127,12 +127,11 @@ impl<'a, W: Write> serde::Serializer for &mut Serializer<'a, W> {
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
+        let bytes = v.bytes();
         self.writer.write_all(&[STRING])?;
-        self.writer.write_all(&v.bytes().len().to_le_bytes())?;
+        self.writer.write_all(&bytes.len().to_le_bytes())?;
         self.writer.write_all(
-            &v.as_bytes()
-                .iter()
-                .copied()
+            &bytes
                 .flat_map(|byte| byte.to_le_bytes())
                 .collect::<Vec<_>>(),
         )?;
