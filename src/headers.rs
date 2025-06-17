@@ -2,7 +2,7 @@ pub const NULL: u8 = 0;
 pub const FALSE: u8 = 0b00001000;
 pub const TRUE: u8 = 0b00011000;
 
-pub const BRAIN_FLOAT: u8 = 0b00000001;
+pub const BF16: u8 = 0b00000001;
 pub const F16: u8 = 0b000100001;
 pub const F32: u8 = 0b01000001;
 pub const F64: u8 = 0b01100001;
@@ -63,7 +63,7 @@ pub const fn header_name(header: u8) -> &'static str {
         NULL => "null",
         FALSE | TRUE => "boolean",
 
-        BRAIN_FLOAT => "brain float",
+        BF16 => "brain float",
         F16 => "16-bit float",
         F32 => "32-bit float",
         F64 => "64-bit float",
