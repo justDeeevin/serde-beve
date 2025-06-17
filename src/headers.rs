@@ -58,7 +58,7 @@ pub const BOOL_ARRAY: u8 = 0b00011100;
 pub const STRING_ARRAY: u8 = 0b00111100;
 pub const GENERIC_ARRAY: u8 = 0b00000101;
 
-pub fn header_name(header: u8) -> &'static str {
+pub const fn header_name(header: u8) -> &'static str {
     match header {
         NULL => "null",
         FALSE | TRUE => "boolean",
