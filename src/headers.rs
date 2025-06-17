@@ -143,6 +143,30 @@ pub enum ArrayKind {
     F64,
 }
 
+impl ArrayKind {
+    pub const fn header(self) -> u8 {
+        match self {
+            Self::Generic => GENERIC_ARRAY,
+            Self::String => STRING,
+            Self::Boolean => TRUE,
+            Self::I8 => I8,
+            Self::I16 => I16,
+            Self::I32 => I32,
+            Self::I64 => I64,
+            Self::I128 => I128,
+            Self::U8 => U8,
+            Self::U16 => U16,
+            Self::U32 => U32,
+            Self::U64 => U64,
+            Self::U128 => U128,
+            Self::BF16 => BF16,
+            Self::F16 => F16,
+            Self::F32 => F32,
+            Self::F64 => F64,
+        }
+    }
+}
+
 impl std::fmt::Display for ArrayKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
