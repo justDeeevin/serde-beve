@@ -58,6 +58,13 @@ pub const BOOL_ARRAY: u8 = 0b00011100;
 pub const STRING_ARRAY: u8 = 0b00111100;
 pub const GENERIC_ARRAY: u8 = 0b00000101;
 
+pub const DELIMITER: u8 = 0b00000110;
+pub const TAG: u8 = 0b00001110;
+pub const MATRIX: u8 = 0b00010110;
+pub const COMPLEX: u8 = 0b00011110;
+
+pub const RESERVED: u8 = 0b00000111;
+
 pub const fn header_name(header: u8) -> &'static str {
     match header {
         NULL => "null",
@@ -118,6 +125,13 @@ pub const fn header_name(header: u8) -> &'static str {
         BOOL_ARRAY => "array of booleans",
         STRING_ARRAY => "array of strings",
         GENERIC_ARRAY => "generic array",
+
+        DELIMITER => "data delimiter",
+        TAG => "type tag",
+        MATRIX => "matrix",
+        COMPLEX => "complex number",
+
+        RESERVED => "reserved",
         _ => "unknown type",
     }
 }
