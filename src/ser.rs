@@ -263,7 +263,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
         Ok(MapSerializer {
             serializer: self,
-            key_type: None,
+            kind: None,
             len,
         })
     }
@@ -275,7 +275,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
     ) -> Result<Self::SerializeStruct, Self::Error> {
         Ok(MapSerializer {
             serializer: self,
-            key_type: Some(KeyType::String),
+            kind: Some(ObjectKind::String),
             len,
         })
     }
@@ -357,66 +357,15 @@ impl<'ser, W: Write> SerializeTupleVariant for &mut Serializer<'ser, W> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum KeyType {
-    U8,
-    U16,
-    U32,
-    U64,
-    U128,
-    I8,
-    I16,
-    I32,
-    I64,
-    I128,
-    String,
-}
-
-impl KeyType {
-    pub fn header(self) -> u8 {
-        match self {
-            KeyType::U8 => U8_OBJECT,
-            KeyType::U16 => U16_OBJECT,
-            KeyType::U32 => U32_OBJECT,
-            KeyType::U64 => U64_OBJECT,
-            KeyType::U128 => U128_OBJECT,
-            KeyType::I8 => I8_OBJECT,
-            KeyType::I16 => I16_OBJECT,
-            KeyType::I32 => I32_OBJECT,
-            KeyType::I64 => I64_OBJECT,
-            KeyType::I128 => I128_OBJECT,
-            KeyType::String => STRING_OBJECT,
-        }
-    }
-}
-
-impl std::fmt::Display for KeyType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            KeyType::U8 => write!(f, "8-bit unsigned integer"),
-            KeyType::U16 => write!(f, "16-bit unsigned integer"),
-            KeyType::U32 => write!(f, "32-bit unsigned integer"),
-            KeyType::U64 => write!(f, "64-bit unsigned integer"),
-            KeyType::U128 => write!(f, "128-bit unsigned integer"),
-            KeyType::I8 => write!(f, "8-bit signed integer"),
-            KeyType::I16 => write!(f, "16-bit signed integer"),
-            KeyType::I32 => write!(f, "32-bit signed integer"),
-            KeyType::I64 => write!(f, "64-bit signed integer"),
-            KeyType::I128 => write!(f, "128-bit signed integer"),
-            KeyType::String => write!(f, "string"),
-        }
-    }
-}
-
 pub struct MapSerializer<'a, 'ser, W: Write> {
     serializer: &'a mut Serializer<'ser, W>,
-    key_type: Option<KeyType>,
+    kind: Option<ObjectKind>,
     len: usize,
 }
 
 impl<'a, 'ser, W: Write> MapSerializer<'a, 'ser, W> {
-    pub fn set_key_type(&mut self, key_type: KeyType) -> Result<(), Error> {
-        self.key_type = Some(key_type);
+    pub fn set_key_type(&mut self, key_type: ObjectKind) -> Result<(), Error> {
+        self.kind = Some(key_type);
         self.serializer.writer.write_all(&[key_type.header()])?;
         self.serializer.serialize_size(self.len)?;
         Ok(())
@@ -431,7 +380,7 @@ impl<'a, 'ser, W: Write> SerializeMap for MapSerializer<'a, 'ser, W> {
     where
         T: ?Sized + serde::Serialize,
     {
-        key.serialize(KeySerializer { serializer: self })
+        key.serialize(KeySerializer { map: self })
     }
 
     fn serialize_value<T>(&mut self, value: &T) -> Result<(), Self::Error>
@@ -454,7 +403,7 @@ impl<'a, 'ser, W: Write> SerializeStruct for MapSerializer<'a, 'ser, W> {
     where
         T: ?Sized + serde::Serialize,
     {
-        key.serialize(KeySerializer { serializer: self })?;
+        key.serialize(KeySerializer { map: self })?;
         value.serialize(&mut *self.serializer)
     }
 
@@ -471,7 +420,7 @@ impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
     where
         T: ?Sized + Serialize,
     {
-        key.serialize(KeySerializer { serializer: self })?;
+        key.serialize(KeySerializer { map: self })?;
         value.serialize(&mut *self.serializer)
     }
 
@@ -481,7 +430,7 @@ impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
 }
 
 struct KeySerializer<'a, 'b, 'ser, W: Write> {
-    serializer: &'a mut MapSerializer<'b, 'ser, W>,
+    map: &'a mut MapSerializer<'b, 'ser, W>,
 }
 
 type Impossible = serde::ser::Impossible<(), Error>;
@@ -503,153 +452,153 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for KeySerializer<'a, 'b, 'ser, W
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::I8) => {}
-            None => self.serializer.set_key_type(KeyType::I8)?,
+        match self.map.kind {
+            Some(ObjectKind::I8) => {}
+            None => self.map.set_key_type(ObjectKind::I8)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::I8,
+                    expected: ObjectKind::I8,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_i8(v)
+        self.map.serializer.serialize_i8(v)
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::I16) => {}
-            None => self.serializer.set_key_type(KeyType::I16)?,
+        match self.map.kind {
+            Some(ObjectKind::I16) => {}
+            None => self.map.set_key_type(ObjectKind::I16)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::I16,
+                    expected: ObjectKind::I16,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_i16(v)
+        self.map.serializer.serialize_i16(v)
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::I32) => {}
-            None => self.serializer.set_key_type(KeyType::I32)?,
+        match self.map.kind {
+            Some(ObjectKind::I32) => {}
+            None => self.map.set_key_type(ObjectKind::I32)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::I32,
+                    expected: ObjectKind::I32,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_i32(v)
+        self.map.serializer.serialize_i32(v)
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::I64) => {}
-            None => self.serializer.set_key_type(KeyType::I64)?,
+        match self.map.kind {
+            Some(ObjectKind::I64) => {}
+            None => self.map.set_key_type(ObjectKind::I64)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::I64,
+                    expected: ObjectKind::I64,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_i64(v)
+        self.map.serializer.serialize_i64(v)
     }
 
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::I128) => {}
-            None => self.serializer.set_key_type(KeyType::I128)?,
+        match self.map.kind {
+            Some(ObjectKind::I128) => {}
+            None => self.map.set_key_type(ObjectKind::I128)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::I128,
+                    expected: ObjectKind::I128,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_i128(v)
+        self.map.serializer.serialize_i128(v)
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::U8) => {}
-            None => self.serializer.set_key_type(KeyType::U8)?,
+        match self.map.kind {
+            Some(ObjectKind::U8) => {}
+            None => self.map.set_key_type(ObjectKind::U8)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::U8,
+                    expected: ObjectKind::U8,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_u8(v)
+        self.map.serializer.serialize_u8(v)
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::U16) => {}
-            None => self.serializer.set_key_type(KeyType::U16)?,
+        match self.map.kind {
+            Some(ObjectKind::U16) => {}
+            None => self.map.set_key_type(ObjectKind::U16)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::U16,
+                    expected: ObjectKind::U16,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_u16(v)
+        self.map.serializer.serialize_u16(v)
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::U32) => {}
-            None => self.serializer.set_key_type(KeyType::U32)?,
+        match self.map.kind {
+            Some(ObjectKind::U32) => {}
+            None => self.map.set_key_type(ObjectKind::U32)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::U32,
+                    expected: ObjectKind::U32,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_u32(v)
+        self.map.serializer.serialize_u32(v)
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::U64) => {}
-            None => self.serializer.set_key_type(KeyType::U64)?,
+        match self.map.kind {
+            Some(ObjectKind::U64) => {}
+            None => self.map.set_key_type(ObjectKind::U64)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::U64,
+                    expected: ObjectKind::U64,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_u64(v)
+        self.map.serializer.serialize_u64(v)
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::U128) => {}
-            None => self.serializer.set_key_type(KeyType::U128)?,
+        match self.map.kind {
+            Some(ObjectKind::U128) => {}
+            None => self.map.set_key_type(ObjectKind::U128)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::U128,
+                    expected: ObjectKind::U128,
                     found,
                 });
             }
         }
 
-        self.serializer.serializer.serialize_u128(v)
+        self.map.serializer.serialize_u128(v)
     }
 
     fn serialize_f32(self, _v: f32) -> Result<Self::Ok, Self::Error> {
@@ -665,17 +614,17 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for KeySerializer<'a, 'b, 'ser, W
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        match self.serializer.key_type {
-            Some(KeyType::String) => {}
-            None => self.serializer.set_key_type(KeyType::String)?,
+        match self.map.kind {
+            Some(ObjectKind::String) => {}
+            None => self.map.set_key_type(ObjectKind::String)?,
             Some(found) => {
                 return Err(Error::MismatchedKeyType {
-                    expected: KeyType::String,
+                    expected: ObjectKind::String,
                     found,
                 });
             }
         }
-        self.serializer.serializer.serialize_str_value(v.bytes())
+        self.map.serializer.serialize_str_value(v.bytes())
     }
 
     fn serialize_bytes(self, _v: &[u8]) -> Result<Self::Ok, Self::Error> {

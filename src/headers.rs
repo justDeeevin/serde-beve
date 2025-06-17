@@ -121,3 +121,99 @@ pub const fn header_name(header: u8) -> &'static str {
         _ => "unknown type",
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum ArrayKind {
+    Generic,
+    String,
+    Boolean,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    BF16,
+    F16,
+    F32,
+    F64,
+}
+
+impl std::fmt::Display for ArrayKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Generic => write!(f, "{}", header_name(GENERIC_ARRAY)),
+            Self::String => write!(f, "{}", header_name(STRING)),
+            Self::Boolean => write!(f, "{}", header_name(TRUE)),
+            Self::I8 => write!(f, "{}", header_name(I8)),
+            Self::I16 => write!(f, "{}", header_name(I16)),
+            Self::I32 => write!(f, "{}", header_name(I32)),
+            Self::I64 => write!(f, "{}", header_name(I64)),
+            Self::I128 => write!(f, "{}", header_name(I128)),
+            Self::U8 => write!(f, "{}", header_name(U8)),
+            Self::U16 => write!(f, "{}", header_name(U16)),
+            Self::U32 => write!(f, "{}", header_name(U32)),
+            Self::U64 => write!(f, "{}", header_name(U64)),
+            Self::U128 => write!(f, "{}", header_name(U128)),
+            Self::BF16 => write!(f, "{}", header_name(BF16)),
+            Self::F16 => write!(f, "{}", header_name(F16)),
+            Self::F32 => write!(f, "{}", header_name(F32)),
+            Self::F64 => write!(f, "{}", header_name(F64)),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ObjectKind {
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
+    String,
+}
+
+impl ObjectKind {
+    pub fn header(self) -> u8 {
+        match self {
+            Self::U8 => U8_OBJECT,
+            Self::U16 => U16_OBJECT,
+            Self::U32 => U32_OBJECT,
+            Self::U64 => U64_OBJECT,
+            Self::U128 => U128_OBJECT,
+            Self::I8 => I8_OBJECT,
+            Self::I16 => I16_OBJECT,
+            Self::I32 => I32_OBJECT,
+            Self::I64 => I64_OBJECT,
+            Self::I128 => I128_OBJECT,
+            Self::String => STRING_OBJECT,
+        }
+    }
+}
+
+impl std::fmt::Display for ObjectKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::U8 => write!(f, "{}", header_name(U8)),
+            Self::U16 => write!(f, "{}", header_name(U16)),
+            Self::U32 => write!(f, "{}", header_name(U32)),
+            Self::U64 => write!(f, "{}", header_name(U64)),
+            Self::U128 => write!(f, "{}", header_name(U128)),
+            Self::I8 => write!(f, "{}", header_name(I8)),
+            Self::I16 => write!(f, "{}", header_name(I16)),
+            Self::I32 => write!(f, "{}", header_name(I32)),
+            Self::I64 => write!(f, "{}", header_name(I64)),
+            Self::I128 => write!(f, "{}", header_name(I128)),
+            Self::String => write!(f, "{}", header_name(STRING)),
+        }
+    }
+}
