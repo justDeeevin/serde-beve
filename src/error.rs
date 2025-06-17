@@ -51,6 +51,8 @@ pub enum Error {
         #[source]
         std::string::FromUtf8Error,
     ),
+    #[error("Cannot deserialize reserved")]
+    Reserved,
     #[error("Variants are tagged by index in BEVE")]
     Variant,
     #[error("Variant index out of range")]

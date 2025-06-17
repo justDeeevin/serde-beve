@@ -613,6 +613,8 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
 
             TAG => self.deserialize_variant(visitor, None),
 
+            RESERVED => Err(Error::Reserved),
+
             header => Err(Error::InvalidHeader(header)),
         }
     }
