@@ -1,6 +1,7 @@
 use crate::headers::{ArrayKind, ObjectKind};
 
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     #[error("{0}")]
     Custom(String),
