@@ -54,7 +54,7 @@ pub const U32_ARRAY: u8 = 0b01010100;
 pub const U64_ARRAY: u8 = 0b01110100;
 pub const U128_ARRAY: u8 = 0b10010100;
 
-pub const BOOL_ARRRAY: u8 = 0b00011100;
+pub const BOOL_ARRAY: u8 = 0b00011100;
 pub const STRING_ARRAY: u8 = 0b00111100;
 pub const GENERIC_ARRAY: u8 = 0b00000101;
 
@@ -115,7 +115,7 @@ pub fn header_name(header: u8) -> &'static str {
         U64_ARRAY => "array of 64-bit unsigned integers",
         U128_ARRAY => "array of 128-bit unsigned integers",
 
-        BOOL_ARRRAY => "array of booleans",
+        BOOL_ARRAY => "array of booleans",
         STRING_ARRAY => "array of strings",
         GENERIC_ARRAY => "generic array",
         _ => "unknown type",
