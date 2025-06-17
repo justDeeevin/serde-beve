@@ -1,7 +1,8 @@
 use std::io::Read;
 
 use serde::{
-    de::{MapAccess, SeqAccess, Visitor},
+    Deserializer as _,
+    de::{EnumAccess, MapAccess, SeqAccess, VariantAccess, Visitor},
     forward_to_deserialize_any,
 };
 
@@ -520,6 +521,27 @@ impl<'de, R: Read> Deserializer<'de, R> {
         self.reader.read_exact(&mut bytes)?;
         Ok(f64::from_le_bytes(bytes))
     }
+
+    pub(self) fn deserialize_variant<V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+        range: Option<usize>,
+    ) -> Result<V::Value, Error> {
+        if self.get_byte()? != TAG {
+            return Err(Error::WrongType {
+                expected: header_name(TAG),
+                found: header_name(self.get_byte()?),
+            });
+        }
+        let index = self.get_size()? as u32;
+        if range.is_some_and(|r| index as usize >= r) {
+            return Err(Error::VariantOutOfRange);
+        }
+        visitor.visit_enum(EnumDeserializer {
+            deserializer: self,
+            index,
+        })
+    }
 }
 
 impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
@@ -588,6 +610,8 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
             BOOL_ARRAY => self.deserialize_bool_array(visitor),
             STRING_ARRAY => self.deserialize_string_array(visitor),
             GENERIC_ARRAY => self.deserialize_seq(visitor),
+
+            TAG => self.deserialize_variant(visitor, None),
 
             header => Err(Error::InvalidHeader(header)),
         }
@@ -835,8 +859,21 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, kind))
     }
 
+    fn deserialize_enum<V>(
+        self,
+        _name: &'static str,
+        variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserialize_variant(visitor, Some(variants.len()))
+    }
+
     forward_to_deserialize_any! {
-        char str bytes byte_buf option unit unit_struct newtype_struct tuple tuple_struct struct enum identifier ignored_any
+        char str bytes byte_buf option unit unit_struct newtype_struct tuple tuple_struct struct
+        identifier ignored_any
     }
 }
 
@@ -1346,7 +1383,123 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
     }
 
     forward_to_deserialize_any! {
-        bool f32 f64 char str bytes byte_buf option unit unit_struct newtype_struct seq tuple tuple_struct map struct enum identifier ignored_any
+        bool f32 f64 char str bytes byte_buf option unit unit_struct newtype_struct seq tuple tuple_struct map
+        struct enum identifier ignored_any
+    }
+}
+
+struct EnumDeserializer<'a, 'de, R: Read> {
+    pub deserializer: &'a mut Deserializer<'de, R>,
+    pub index: u32,
+}
+
+impl<'a, 'de, R: Read> EnumAccess<'de> for EnumDeserializer<'a, 'de, R> {
+    type Error = Error;
+    type Variant = VariantAccessor<'a, 'de, R>;
+
+    fn variant_seed<V>(self, seed: V) -> Result<(V::Value, Self::Variant), Self::Error>
+    where
+        V: serde::de::DeserializeSeed<'de>,
+    {
+        Ok((
+            seed.deserialize(VariantDeserializer { index: self.index })?,
+            VariantAccessor {
+                deserializer: self.deserializer,
+            },
+        ))
+    }
+}
+
+struct VariantDeserializer {
+    pub index: u32,
+}
+
+impl<'de> serde::Deserializer<'de> for VariantDeserializer {
+    type Error = Error;
+
+    fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        Err(Error::Variant)
+    }
+
+    fn deserialize_u8<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_u8(self.index as u8)
+    }
+
+    fn deserialize_u16<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_u16(self.index as u16)
+    }
+
+    fn deserialize_u32<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_u32(self.index)
+    }
+
+    fn deserialize_u64<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_u64(self.index as u64)
+    }
+
+    fn deserialize_u128<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_u128(self.index as u128)
+    }
+
+    forward_to_deserialize_any! {
+        bool byte_buf bytes char enum f32 f64 i8 i16 i32 i64 identifier ignored_any map newtype_struct
+        option seq str string struct tuple tuple_struct unit unit_struct
+    }
+}
+
+struct VariantAccessor<'a, 'de, R: Read> {
+    pub deserializer: &'a mut Deserializer<'de, R>,
+}
+
+impl<'a, 'de, R: Read> VariantAccess<'de> for VariantAccessor<'a, 'de, R> {
+    type Error = Error;
+
+    fn unit_variant(self) -> Result<(), Self::Error> {
+        self.deserializer.get_byte()?;
+        Ok(())
+    }
+
+    fn newtype_variant_seed<T>(self, seed: T) -> Result<T::Value, Self::Error>
+    where
+        T: serde::de::DeserializeSeed<'de>,
+    {
+        seed.deserialize(self.deserializer)
+    }
+
+    fn tuple_variant<V>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserializer.deserialize_tuple(len, visitor)
+    }
+
+    fn struct_variant<V>(
+        self,
+        fields: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserializer.deserialize_struct("", fields, visitor)
     }
 }
 

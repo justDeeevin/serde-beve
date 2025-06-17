@@ -51,6 +51,10 @@ pub enum Error {
         #[source]
         std::string::FromUtf8Error,
     ),
+    #[error("Variants are tagged by index in BEVE")]
+    Variant,
+    #[error("Variant index out of range")]
+    VariantOutOfRange,
 }
 
 #[derive(Debug)]
