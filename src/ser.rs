@@ -10,7 +10,7 @@ use crate::{error::Error, headers::*};
 use std::io::Write;
 
 pub struct Serializer<'ser, W: Write> {
-    writer: &'ser mut W,
+    pub(self) writer: &'ser mut W,
 }
 
 impl<'ser, W: Write> Serializer<'ser, W> {
@@ -357,13 +357,13 @@ impl<'ser, W: Write> SerializeTupleVariant for &mut Serializer<'ser, W> {
 }
 
 pub struct MapSerializer<'a, 'ser, W: Write> {
-    serializer: &'a mut Serializer<'ser, W>,
-    kind: Option<ObjectKind>,
-    len: usize,
+    pub(self) serializer: &'a mut Serializer<'ser, W>,
+    pub(self) kind: Option<ObjectKind>,
+    pub(self) len: usize,
 }
 
 impl<'a, 'ser, W: Write> MapSerializer<'a, 'ser, W> {
-    pub fn set_key_type(&mut self, key_type: ObjectKind) -> Result<(), Error> {
+    pub(self) fn set_key_type(&mut self, key_type: ObjectKind) -> Result<(), Error> {
         self.kind = Some(key_type);
         self.serializer.writer.write_all(&[key_type.header()])?;
         self.serializer.serialize_size(self.len)?;
@@ -429,7 +429,7 @@ impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
 }
 
 struct KeySerializer<'a, 'b, 'ser, W: Write> {
-    map: &'a mut MapSerializer<'b, 'ser, W>,
+    pub map: &'a mut MapSerializer<'b, 'ser, W>,
 }
 
 type Impossible = serde::ser::Impossible<(), Error>;
@@ -748,7 +748,7 @@ impl<'a, 'ser, W: Write> SeqSerializer<'a, 'ser, W> {
         }
     }
 
-    pub fn set_kind(&mut self, kind: ArrayKind) -> Result<(), Error> {
+    pub(self) fn set_kind(&mut self, kind: ArrayKind) -> Result<(), Error> {
         self.kind = Some(kind);
         self.serializer.writer.write_all(&[kind.header()])?;
         self.serializer.serialize_size(self.len)?;

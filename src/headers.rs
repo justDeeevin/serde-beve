@@ -207,7 +207,7 @@ pub enum ObjectKind {
 }
 
 impl ObjectKind {
-    pub fn header(self) -> u8 {
+    pub const fn header(self) -> u8 {
         match self {
             Self::U8 => U8_OBJECT,
             Self::U16 => U16_OBJECT,
