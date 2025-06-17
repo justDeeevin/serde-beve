@@ -884,7 +884,7 @@ struct ElementDeserializer<'a, 'b, 'de, R: Read> {
     pub kind: ArrayKind,
 }
 
-impl<'a, 'b, 'de, R: Read> serde::de::Deserializer<'de> for ElementDeserializer<'a, 'b, 'de, R> {
+impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 'b, 'de, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -1170,7 +1170,7 @@ struct KeyDeserializer<'a, 'b, 'de, R: Read> {
     pub kind: ObjectKind,
 }
 
-impl<'a, 'b, 'de, R: Read> serde::de::Deserializer<'de> for KeyDeserializer<'a, 'b, 'de, R> {
+impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 'de, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -1350,7 +1350,7 @@ impl<'a, 'b, 'de, R: Read> serde::de::Deserializer<'de> for KeyDeserializer<'a, 
     }
 }
 
-pub fn from_reader<'de, R: Read, T: serde::de::Deserialize<'de>>(
+pub fn from_reader<'de, R: Read, T: serde::Deserialize<'de>>(
     reader: &'de mut R,
 ) -> Result<T, Error> {
     let mut deserializer = Deserializer::new(reader);
