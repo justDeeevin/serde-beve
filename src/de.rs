@@ -1,7 +1,9 @@
+mod enums;
 mod map;
 mod seq;
 
 use crate::{Error, error::SpecialType, headers::*};
+use enums::EnumDeserializer;
 use map::MapDeserializer;
 use seq::SeqDeserializer;
 use serde::{de::Visitor, forward_to_deserialize_any};
@@ -589,6 +591,14 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
             STRING_ARRAY => self.deserialize_string_array(visitor),
             GENERIC_ARRAY => self.deserialize_seq(visitor),
 
+            DELIMITER => {
+                self.get_byte()?;
+                visitor.visit_unit()
+            }
+            TAG => self.deserialize_enum("", &[], visitor),
+            MATRIX => todo!(),
+            COMPLEX => todo!(),
+
             RESERVED => Err(Error::Reserved),
             header => Err(Error::InvalidHeader(header)),
         }
@@ -836,6 +846,17 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, kind))
     }
 
+    fn deserialize_enum<V>(
+        self,
+        _name: &'static str,
+        _variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_enum(EnumDeserializer { deserializer: self })
+    }
     forward_to_deserialize_any! {
         char str bytes byte_buf option unit unit_struct newtype_struct tuple tuple_struct struct enum identifier ignored_any
     }

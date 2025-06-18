@@ -89,6 +89,11 @@ pub enum Error {
     #[error("Cannot deserialize reserved")]
     /// Returned when attempting to deserialize a reserved header.
     Reserved,
+
+    #[error("Enum variant tags must be deserialized as identifiers")]
+    /// Returned when attempting to deserialize an enum tag as something other than an identifier.
+    InvalidTag,
+
 }
 
 #[derive(Debug)]
