@@ -1050,3 +1050,9 @@ pub fn from_reader<T: serde::de::DeserializeOwned>(reader: impl Read) -> Result<
     let mut deserializer = Deserializer::new(reader);
     T::deserialize(&mut deserializer)
 }
+
+/// Deserializes the data from the `bytes` as `T`.
+pub fn from_bytes<'de, T: serde::de::Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, Error> {
+    let mut deserializer = Deserializer::new(bytes);
+    T::deserialize(&mut deserializer)
+}

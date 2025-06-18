@@ -29,7 +29,7 @@ pub mod value;
 
 mod headers;
 
-pub use de::from_reader;
+pub use de::{from_bytes, from_reader};
 pub use error::{Error, Result};
 pub use headers::{ArrayKind, ObjectKind};
 pub use ser::to_writer;
