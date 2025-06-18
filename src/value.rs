@@ -6,10 +6,16 @@ pub enum Value {
     True,
     False,
     #[cfg(feature = "half")]
+    /// <div class="warning">
+    /// When the `half` feature is disabled, this variant will carry no payload.
+    /// </div>
     BF16(half::bf16),
     #[cfg(not(feature = "half"))]
     BF16,
     #[cfg(feature = "half")]
+    /// <div class="warning">
+    /// When the `half` feature is disabled, this variant will carry no payload.
+    /// </div>
     F16(half::f16),
     #[cfg(not(feature = "half"))]
     F16,
