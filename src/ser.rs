@@ -357,6 +357,7 @@ impl<'ser, W: Write> SerializeTupleVariant for &mut Serializer<'ser, W> {
     }
 }
 
+/// Serializes the `value` into the `writer`.
 pub fn to_writer<W: Write, T: serde::Serialize>(writer: &mut W, value: &T) -> Result<(), Error> {
     let mut serializer = Serializer::new(writer);
     value.serialize(&mut serializer)

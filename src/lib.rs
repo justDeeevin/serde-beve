@@ -14,12 +14,16 @@
 //! [^1]: <https://github.com/beve-org/beve?tab=readme-ov-file#compressed-unsigned-integer>
 //! [^2]: (2^62) - 1 = 4611686018427387904
 
+/// Deserialization logic.
 pub mod de;
+/// Errors that can occur during serialization or deserialization.
 pub mod error;
+/// Serialization logic.
 pub mod ser;
 
 pub use de::from_reader;
 pub use error::{Error, Result};
+pub use headers::{ArrayKind, ObjectKind};
 pub use ser::to_writer;
 
 mod headers;

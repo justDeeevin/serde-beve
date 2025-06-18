@@ -85,7 +85,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::I8 => visitor.visit_i8(self.seq.deserializer.get_i8_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_i8(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::I8,
                 found,
             }),
@@ -99,7 +99,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::I16 => visitor.visit_i16(self.seq.deserializer.get_i16_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_i16(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::I16,
                 found,
             }),
@@ -113,7 +113,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::I32 => visitor.visit_i32(self.seq.deserializer.get_i32_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_i32(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::I32,
                 found,
             }),
@@ -127,7 +127,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::I64 => visitor.visit_i64(self.seq.deserializer.get_i64_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_i64(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::I64,
                 found,
             }),
@@ -141,7 +141,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::I128 => visitor.visit_i128(self.seq.deserializer.get_i128_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_i128(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::I128,
                 found,
             }),
@@ -155,7 +155,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::U8 => visitor.visit_u8(self.seq.deserializer.get_u8_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_u8(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::U8,
                 found,
             }),
@@ -169,7 +169,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::U16 => visitor.visit_u16(self.seq.deserializer.get_u16_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_u16(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::U16,
                 found,
             }),
@@ -183,7 +183,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::U32 => visitor.visit_u32(self.seq.deserializer.get_u32_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_u32(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::U32,
                 found,
             }),
@@ -197,7 +197,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::U64 => visitor.visit_u64(self.seq.deserializer.get_u64_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_u64(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::U64,
                 found,
             }),
@@ -211,7 +211,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::U128 => visitor.visit_u128(self.seq.deserializer.get_u128_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_u128(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::U128,
                 found,
             }),
@@ -225,7 +225,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::F32 => visitor.visit_f32(self.seq.deserializer.get_f32_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_f32(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::F32,
                 found,
             }),
@@ -239,7 +239,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::F64 => visitor.visit_f64(self.seq.deserializer.get_f64_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_f64(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::F64,
                 found,
             }),
@@ -263,7 +263,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
                 visitor.visit_bool(bit != 0)
             }
             ArrayKind::Generic => self.seq.deserializer.deserialize_bool(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::Boolean,
                 found,
             }),
@@ -277,7 +277,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for ElementDeserializer<'a, 
         match self.kind {
             ArrayKind::String => visitor.visit_string(self.seq.deserializer.get_string_value()?),
             ArrayKind::Generic => self.seq.deserializer.deserialize_string(visitor),
-            found => Err(Error::MismatchedArrayType {
+            found => Err(Error::MismatchedElementType {
                 expected: ArrayKind::String,
                 found,
             }),

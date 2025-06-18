@@ -120,7 +120,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Boolean)?,
             Some(ArrayKind::Boolean) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Boolean,
                     found,
                 });
@@ -144,7 +144,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::I8)?,
             Some(ArrayKind::I8) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::I8,
                     found,
                 });
@@ -160,7 +160,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::I16)?,
             Some(ArrayKind::I16) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::I16,
                     found,
                 });
@@ -176,7 +176,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::I32)?,
             Some(ArrayKind::I32) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::I32,
                     found,
                 });
@@ -192,7 +192,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::I64)?,
             Some(ArrayKind::I64) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::I64,
                     found,
                 });
@@ -208,7 +208,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::I128)?,
             Some(ArrayKind::I128) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::I128,
                     found,
                 });
@@ -224,7 +224,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::U8)?,
             Some(ArrayKind::U8) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::U8,
                     found,
                 });
@@ -240,7 +240,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::U16)?,
             Some(ArrayKind::U16) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::U16,
                     found,
                 });
@@ -256,7 +256,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::U32)?,
             Some(ArrayKind::U32) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::U32,
                     found,
                 });
@@ -272,7 +272,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::U64)?,
             Some(ArrayKind::U64) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::U64,
                     found,
                 });
@@ -288,7 +288,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::U128)?,
             Some(ArrayKind::U128) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::U128,
                     found,
                 });
@@ -304,7 +304,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::F32)?,
             Some(ArrayKind::F32) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::F32,
                     found,
                 });
@@ -320,7 +320,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::F64)?,
             Some(ArrayKind::F64) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::F64,
                     found,
                 });
@@ -340,7 +340,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::String)?,
             Some(ArrayKind::String) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::String,
                     found,
                 });
@@ -354,7 +354,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -369,7 +369,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -391,7 +391,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -406,7 +406,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -426,7 +426,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -450,7 +450,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -474,7 +474,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -491,7 +491,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -506,7 +506,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -525,7 +525,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -546,7 +546,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -563,7 +563,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -582,7 +582,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });
@@ -603,7 +603,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for ElementSerializer<'a, 'b, 'se
             None => self.seq.set_kind(ArrayKind::Generic)?,
             Some(ArrayKind::Generic) => {}
             Some(found) => {
-                return Err(Error::MismatchedArrayType {
+                return Err(Error::MismatchedElementType {
                     expected: ArrayKind::Generic,
                     found,
                 });

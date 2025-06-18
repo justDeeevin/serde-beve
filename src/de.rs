@@ -841,6 +841,7 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
     }
 }
 
+/// Deserializes the data from the `reader` as `T`.
 pub fn from_reader<'de, R: Read, T: serde::Deserialize<'de>>(
     reader: &'de mut R,
 ) -> Result<T, Error> {
