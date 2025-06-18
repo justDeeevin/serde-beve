@@ -35,9 +35,7 @@ impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, 'de, R> {
             return Ok(None);
         }
 
-        let kind = self.kind;
-        seed.deserialize(KeyDeserializer { map: self, kind })
-            .map(Some)
+        seed.deserialize(self).map(Some)
     }
 
     fn next_value_seed<V>(&mut self, seed: V) -> Result<V::Value, Self::Error>
@@ -48,12 +46,7 @@ impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, 'de, R> {
     }
 }
 
-struct KeyDeserializer<'a, 'b, 'de, R: Read> {
-    pub map: &'a mut MapDeserializer<'b, 'de, R>,
-    pub kind: ObjectKind,
-}
-
-impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 'de, R> {
+impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut MapDeserializer<'a, 'de, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -80,7 +73,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::I8 => visitor.visit_i8(self.map.deserializer.get_i8_value()?),
+            ObjectKind::I8 => visitor.visit_i8(self.deserializer.get_i8_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::I8,
@@ -94,7 +87,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::I16 => visitor.visit_i16(self.map.deserializer.get_i16_value()?),
+            ObjectKind::I16 => visitor.visit_i16(self.deserializer.get_i16_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::I16,
@@ -108,7 +101,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::I32 => visitor.visit_i32(self.map.deserializer.get_i32_value()?),
+            ObjectKind::I32 => visitor.visit_i32(self.deserializer.get_i32_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::I32,
@@ -122,7 +115,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::I64 => visitor.visit_i64(self.map.deserializer.get_i64_value()?),
+            ObjectKind::I64 => visitor.visit_i64(self.deserializer.get_i64_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::I64,
@@ -136,7 +129,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::I128 => visitor.visit_i128(self.map.deserializer.get_i128_value()?),
+            ObjectKind::I128 => visitor.visit_i128(self.deserializer.get_i128_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::I128,
@@ -150,7 +143,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::U8 => visitor.visit_u8(self.map.deserializer.get_u8_value()?),
+            ObjectKind::U8 => visitor.visit_u8(self.deserializer.get_u8_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::U8,
@@ -164,7 +157,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::U16 => visitor.visit_u16(self.map.deserializer.get_u16_value()?),
+            ObjectKind::U16 => visitor.visit_u16(self.deserializer.get_u16_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::U16,
@@ -178,7 +171,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::U32 => visitor.visit_u32(self.map.deserializer.get_u32_value()?),
+            ObjectKind::U32 => visitor.visit_u32(self.deserializer.get_u32_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::U32,
@@ -192,7 +185,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::U64 => visitor.visit_u64(self.map.deserializer.get_u64_value()?),
+            ObjectKind::U64 => visitor.visit_u64(self.deserializer.get_u64_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::U64,
@@ -206,7 +199,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::U128 => visitor.visit_u128(self.map.deserializer.get_u128_value()?),
+            ObjectKind::U128 => visitor.visit_u128(self.deserializer.get_u128_value()?),
             ObjectKind::String => self.deserialize_string(visitor),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::U128,
@@ -220,7 +213,7 @@ impl<'a, 'b, 'de, R: Read> serde::Deserializer<'de> for KeyDeserializer<'a, 'b, 
         V: Visitor<'de>,
     {
         match self.kind {
-            ObjectKind::String => visitor.visit_string(self.map.deserializer.get_string_value()?),
+            ObjectKind::String => visitor.visit_string(self.deserializer.get_string_value()?),
             found => Err(Error::MismatchedKeyType {
                 expected: ObjectKind::String,
                 found,

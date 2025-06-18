@@ -47,7 +47,7 @@ impl<'a, 'ser, W: Write> SerializeMap for MapSerializer<'a, 'ser, W> {
     where
         T: ?Sized + serde::Serialize,
     {
-        let key = key.serialize(KeySerializer { map: self })?;
+        let key = key.serialize(&mut *self)?;
         self.keys.push(key);
         Ok(())
     }
@@ -192,13 +192,9 @@ impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
     }
 }
 
-struct KeySerializer<'a, 'b, 'ser, W: Write> {
-    pub map: &'a mut MapSerializer<'b, 'ser, W>,
-}
-
 type Impossible = serde::ser::Impossible<Value, Error>;
 
-impl<'a, 'b, 'ser, W: Write> serde::Serializer for KeySerializer<'a, 'b, 'ser, W> {
+impl<'a, 'ser, W: Write> serde::Serializer for &mut MapSerializer<'a, 'ser, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -215,52 +211,52 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for KeySerializer<'a, 'b, 'ser, W
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::I8)?;
+        self.ensure_kind(ObjectKind::I8)?;
         Ok(Value::I8(v))
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::I16)?;
+        self.ensure_kind(ObjectKind::I16)?;
         Ok(Value::I16(v))
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::I32)?;
+        self.ensure_kind(ObjectKind::I32)?;
         Ok(Value::I32(v))
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::I64)?;
+        self.ensure_kind(ObjectKind::I64)?;
         Ok(Value::I64(v))
     }
 
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::I128)?;
+        self.ensure_kind(ObjectKind::I128)?;
         Ok(Value::I128(v))
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::U8)?;
+        self.ensure_kind(ObjectKind::U8)?;
         Ok(Value::U8(v))
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::U16)?;
+        self.ensure_kind(ObjectKind::U16)?;
         Ok(Value::U16(v))
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::U32)?;
+        self.ensure_kind(ObjectKind::U32)?;
         Ok(Value::U32(v))
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::U64)?;
+        self.ensure_kind(ObjectKind::U64)?;
         Ok(Value::U64(v))
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::U128)?;
+        self.ensure_kind(ObjectKind::U128)?;
         Ok(Value::U128(v))
     }
 
@@ -277,7 +273,7 @@ impl<'a, 'b, 'ser, W: Write> serde::Serializer for KeySerializer<'a, 'b, 'ser, W
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        self.map.ensure_kind(ObjectKind::String)?;
+        self.ensure_kind(ObjectKind::String)?;
         Ok(Value::String(v.bytes().collect()))
     }
 
