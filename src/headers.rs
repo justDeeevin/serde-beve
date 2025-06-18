@@ -136,7 +136,7 @@ pub const fn header_name(header: u8) -> &'static str {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArrayKind {
     Generic,
     String,
@@ -205,7 +205,7 @@ impl std::fmt::Display for ArrayKind {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ObjectKind {
     U8,
     U16,

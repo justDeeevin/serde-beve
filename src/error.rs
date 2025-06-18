@@ -21,10 +21,6 @@ pub enum Error {
         std::io::Error,
     ),
 
-    #[error("Arrays and objects must have a length")]
-    /// Returned when attempting to serialize an array or object without providing a length.
-    MissingLength,
-
     #[error("Keys must be strings or integers")]
     /// Returned when attempting to serialize an object key that is not a string or integer.
     InvalidKey,
@@ -59,7 +55,6 @@ pub enum Error {
     },
 
     #[error("Mismatched array type. Expected {expected}, found {found}.")]
-    // TODO: implement switching from typed array to generic array
     MismatchedElementType {
         expected: ArrayKind,
         found: ArrayKind,

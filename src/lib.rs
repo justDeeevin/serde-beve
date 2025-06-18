@@ -24,10 +24,12 @@ pub mod de;
 pub mod error;
 /// Serialization logic.
 pub mod ser;
+pub mod value;
+
+mod headers;
 
 pub use de::from_reader;
 pub use error::{Error, Result};
 pub use headers::{ArrayKind, ObjectKind};
 pub use ser::to_writer;
-
-mod headers;
+pub use value::Value;
