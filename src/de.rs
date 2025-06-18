@@ -41,6 +41,13 @@ impl<'de, R: Read> Deserializer<'de, R> {
         Ok(read)
     }
 
+    fn get_u8_array(&mut self) -> Result<Vec<u8>, Error> {
+        let size = self.get_size()?;
+        let mut bytes = vec![0; size];
+        self.reader.read_exact(&mut bytes)?;
+        Ok(bytes)
+    }
+
     fn deserialize_bf16<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
         if self.get_byte()? != BF16 {
             return Err(Error::WrongType {
@@ -857,8 +864,106 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
     {
         visitor.visit_enum(EnumDeserializer { deserializer: self })
     }
+
+    fn deserialize_newtype_struct<V>(
+        self,
+        _name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_newtype_struct(self)
+    }
+
+    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_bytes(&self.get_u8_array()?)
+    }
+
+    fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_byte_buf(self.get_u8_array()?)
+    }
+
+    fn deserialize_char<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.get_byte()? {
+            STRING => {}
+            header => {
+                return Err(Error::WrongType {
+                    expected: header_name(STRING),
+                    found: header_name(header),
+                });
+            }
+        }
+
+        let string = self.get_string_value()?;
+        if string.len() != 1 {
+            return Err(Error::WrongType {
+                expected: "character",
+                found: header_name(STRING),
+            });
+        }
+        let Some(char) = string.chars().next() else {
+            return Err(Error::NoChar);
+        };
+
+        visitor.visit_char(char)
+    }
+
+    fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.get_byte()? {
+            STRING => {}
+            header => {
+                return Err(Error::WrongType {
+                    expected: "string",
+                    found: header_name(header),
+                });
+            }
+        }
+
+        let string = self.get_string_value()?;
+        visitor.visit_str(&string)
+    }
+
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.peek_byte()? {
+            NULL => {
+                self.get_byte()?;
+                visitor.visit_none()
+            }
+            _ => visitor.visit_some(self),
+        }
+    }
+
+    fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.get_byte()? {
+            NULL => visitor.visit_unit(),
+            header => Err(Error::WrongType {
+                expected: header_name(NULL),
+                found: header_name(header),
+            }),
+        }
+    }
+
     forward_to_deserialize_any! {
-        char str bytes byte_buf option unit unit_struct newtype_struct tuple tuple_struct struct enum identifier ignored_any
+        unit_struct tuple tuple_struct struct identifier ignored_any
     }
 }
 

@@ -94,6 +94,9 @@ pub enum Error {
     /// Returned when attempting to deserialize an enum tag as something other than an identifier.
     InvalidTag,
 
+    #[error("No character")]
+    /// Returned when an empty string is attempted to be deserialized as a character.
+    NoChar,
 }
 
 #[derive(Debug)]
