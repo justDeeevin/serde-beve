@@ -42,12 +42,6 @@ impl<'ser, W: Write> Serializer<'ser, W> {
 
         Ok(())
     }
-
-    fn serialize_variant(&mut self, variant_index: u32) -> Result<(), Error> {
-        self.writer.write_all(&[TAG])?;
-        self.serialize_size(variant_index as usize)?;
-        Ok(())
-    }
 }
 
 impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
@@ -197,11 +191,10 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
     fn serialize_unit_variant(
         self,
         _name: &'static str,
-        variant_index: u32,
-        _variant: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        self.serialize_variant(variant_index)?;
-        self.serialize_unit()
+        self.serialize_str(variant)
     }
 
     fn serialize_newtype_struct<T>(
@@ -217,16 +210,17 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
     fn serialize_newtype_variant<T>(
         self,
-        _name: &'static str,
-        variant_index: u32,
-        _variant: &'static str,
+        name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
         value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
-        self.serialize_variant(variant_index)?;
-        value.serialize(&mut *self)
+        let mut object = self.serialize_struct(name, 1)?;
+        SerializeStruct::serialize_field(&mut object, variant, value)?;
+        SerializeStruct::end(object)
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -251,12 +245,13 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
     fn serialize_tuple_variant(
         self,
-        _name: &'static str,
-        variant_index: u32,
-        _variant: &'static str,
+        name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        self.serialize_variant(variant_index)?;
+        self.serialize_struct(name, 1)?;
+        self.serialize_str(variant)?;
         self.serialize_seq(Some(len))
     }
 
@@ -286,13 +281,14 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 
     fn serialize_struct_variant(
         self,
-        _name: &'static str,
-        variant_index: u32,
+        name: &'static str,
+        _variant_index: u32,
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        self.serialize_variant(variant_index)?;
-        self.serialize_struct(variant, len)
+        self.serialize_struct(name, 1)?;
+        self.serialize_str_value(variant.bytes())?;
+        self.serialize_struct("", len)
     }
 }
 
