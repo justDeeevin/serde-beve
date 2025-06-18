@@ -5,9 +5,6 @@ pub use map::MapSerializer;
 pub use seq::SeqSerializer;
 
 use crate::{error::Error, headers::*};
-use serde::ser::{
-    SerializeSeq, SerializeStruct, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
-};
 use std::io::Write;
 
 pub struct Serializer<'ser, W: Write> {
@@ -293,69 +290,6 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
     }
 }
 
-impl<'ser, W: Write> SerializeSeq for &mut Serializer<'ser, W> {
-    type Ok = ();
-    type Error = Error;
-
-    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: ?Sized + serde::Serialize,
-    {
-        value.serialize(&mut **self)
-    }
-
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(())
-    }
-}
-
-impl<'ser, W: Write> SerializeTuple for &mut Serializer<'ser, W> {
-    type Ok = ();
-    type Error = Error;
-
-    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: ?Sized + serde::Serialize,
-    {
-        value.serialize(&mut **self)
-    }
-
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(())
-    }
-}
-
-impl<'ser, W: Write> SerializeTupleStruct for &mut Serializer<'ser, W> {
-    type Ok = ();
-    type Error = Error;
-
-    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: ?Sized + serde::Serialize,
-    {
-        value.serialize(&mut **self)
-    }
-
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(())
-    }
-}
-
-impl<'ser, W: Write> SerializeTupleVariant for &mut Serializer<'ser, W> {
-    type Ok = ();
-    type Error = Error;
-
-    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: ?Sized + serde::Serialize,
-    {
-        value.serialize(&mut **self)
-    }
-
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(())
-    }
-}
 
 /// Serializes the `value` into the `writer`.
 pub fn to_writer<W: Write, T: serde::Serialize>(writer: &mut W, value: &T) -> Result<(), Error> {
