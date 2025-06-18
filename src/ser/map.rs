@@ -6,15 +6,15 @@ use serde::{
 };
 use std::io::Write;
 
-pub struct MapSerializer<'a, 'ser, W: Write> {
-    serializer: &'a mut Serializer<'ser, W>,
+pub struct MapSerializer<'a, W: Write> {
+    serializer: &'a mut Serializer<W>,
     pub(self) kind: Option<ObjectKind>,
     keys: Vec<Value>,
     values: Vec<Value>,
 }
 
-impl<'a, 'ser, W: Write> MapSerializer<'a, 'ser, W> {
-    pub(super) fn new(serializer: &'a mut Serializer<'ser, W>, kind: Option<ObjectKind>) -> Self {
+impl<'a, W: Write> MapSerializer<'a, W> {
+    pub(super) fn new(serializer: &'a mut Serializer<W>, kind: Option<ObjectKind>) -> Self {
         Self {
             serializer,
             kind,
@@ -39,7 +39,7 @@ impl<'a, 'ser, W: Write> MapSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeMap for MapSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeMap for MapSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -156,7 +156,7 @@ impl<'a, 'ser, W: Write> SerializeMap for MapSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeStruct for MapSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeStruct for MapSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -174,7 +174,7 @@ impl<'a, 'ser, W: Write> SerializeStruct for MapSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeStructVariant for MapSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -194,7 +194,7 @@ impl<'a, 'ser, W: Write> SerializeStructVariant for MapSerializer<'a, 'ser, W> {
 
 type Impossible = serde::ser::Impossible<Value, Error>;
 
-impl<'a, 'ser, W: Write> serde::Serializer for &mut MapSerializer<'a, 'ser, W> {
+impl<'a, W: Write> serde::Serializer for &mut MapSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 

@@ -10,11 +10,11 @@ use serde::{
 };
 use std::io::Read;
 
-pub struct EnumDeserializer<'a, 'de, R: Read> {
-    pub deserializer: &'a mut Deserializer<'de, R>,
+pub struct EnumDeserializer<'a, R: Read> {
+    pub deserializer: &'a mut Deserializer<R>,
 }
 
-impl<'a, 'de, R: Read> EnumAccess<'de> for EnumDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> EnumAccess<'de> for EnumDeserializer<'a, R> {
     type Error = Error;
     type Variant = Self;
 
@@ -26,7 +26,7 @@ impl<'a, 'de, R: Read> EnumAccess<'de> for EnumDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> VariantAccess<'de> for EnumDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> VariantAccess<'de> for EnumDeserializer<'a, R> {
     type Error = Error;
 
     fn unit_variant(self) -> Result<(), Self::Error> {
@@ -66,7 +66,7 @@ impl<'a, 'de, R: Read> VariantAccess<'de> for EnumDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut EnumDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut EnumDeserializer<'a, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value, Self::Error>

@@ -6,14 +6,14 @@ use serde::{
 };
 use std::io::Write;
 
-pub struct SeqSerializer<'a, 'ser, W: Write> {
-    serializer: &'a mut Serializer<'ser, W>,
+pub struct SeqSerializer<'a, W: Write> {
+    serializer: &'a mut Serializer<W>,
     pub kind: Option<ArrayKind>,
     elements: Vec<Value>,
 }
 
-impl<'a, 'ser, W: Write> SeqSerializer<'a, 'ser, W> {
-    pub fn new(serializer: &'a mut Serializer<'ser, W>) -> Self {
+impl<'a, W: Write> SeqSerializer<'a, W> {
+    pub fn new(serializer: &'a mut Serializer<W>) -> Self {
         Self {
             serializer,
             kind: None,
@@ -40,7 +40,7 @@ impl<'a, 'ser, W: Write> SeqSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeSeq for SeqSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeSeq for SeqSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -208,7 +208,7 @@ impl<'a, 'ser, W: Write> SerializeSeq for SeqSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeTuple for SeqSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeTuple for SeqSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -224,7 +224,7 @@ impl<'a, 'ser, W: Write> SerializeTuple for SeqSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeTupleStruct for SeqSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeTupleStruct for SeqSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -240,7 +240,7 @@ impl<'a, 'ser, W: Write> SerializeTupleStruct for SeqSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> SerializeTupleVariant for SeqSerializer<'a, 'ser, W> {
+impl<'a, W: Write> SerializeTupleVariant for SeqSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
@@ -256,17 +256,17 @@ impl<'a, 'ser, W: Write> SerializeTupleVariant for SeqSerializer<'a, 'ser, W> {
     }
 }
 
-impl<'a, 'b, 'ser, W: Write> serde::Serializer for &'b mut SeqSerializer<'a, 'ser, W> {
+impl<'a, 'b, W: Write> serde::Serializer for &'b mut SeqSerializer<'a, W> {
     type Ok = Value;
     type Error = Error;
 
-    type SerializeSeq = SeqSerializer<'b, 'ser, W>;
-    type SerializeTuple = SeqSerializer<'b, 'ser, W>;
-    type SerializeTupleStruct = SeqSerializer<'b, 'ser, W>;
-    type SerializeTupleVariant = SeqSerializer<'b, 'ser, W>;
-    type SerializeMap = MapSerializer<'b, 'ser, W>;
-    type SerializeStruct = MapSerializer<'b, 'ser, W>;
-    type SerializeStructVariant = MapSerializer<'b, 'ser, W>;
+    type SerializeSeq = SeqSerializer<'b, W>;
+    type SerializeTuple = SeqSerializer<'b, W>;
+    type SerializeTupleStruct = SeqSerializer<'b, W>;
+    type SerializeTupleVariant = SeqSerializer<'b, W>;
+    type SerializeMap = MapSerializer<'b, W>;
+    type SerializeStruct = MapSerializer<'b, W>;
+    type SerializeStructVariant = MapSerializer<'b, W>;
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::Boolean);

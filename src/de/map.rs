@@ -6,15 +6,15 @@ use serde::{
 };
 use std::io::Read;
 
-pub struct MapDeserializer<'a, 'de, R: Read> {
-    pub deserializer: &'a mut Deserializer<'de, R>,
+pub struct MapDeserializer<'a, R: Read> {
+    pub deserializer: &'a mut Deserializer<R>,
     pub len: usize,
     pub index: usize,
     pub kind: ObjectKind,
 }
 
-impl<'a, 'de, R: Read> MapDeserializer<'a, 'de, R> {
-    pub fn new(deserializer: &'a mut Deserializer<'de, R>, len: usize, kind: ObjectKind) -> Self {
+impl<'a, R: Read> MapDeserializer<'a, R> {
+    pub fn new(deserializer: &'a mut Deserializer<R>, len: usize, kind: ObjectKind) -> Self {
         Self {
             deserializer,
             len,
@@ -24,7 +24,7 @@ impl<'a, 'de, R: Read> MapDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, R> {
     type Error = Error;
 
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
@@ -46,7 +46,7 @@ impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut MapDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut MapDeserializer<'a, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>

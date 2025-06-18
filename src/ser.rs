@@ -7,12 +7,12 @@ pub use seq::SeqSerializer;
 use crate::{Value, error::Error, headers::*};
 use std::io::Write;
 
-pub struct Serializer<'ser, W: Write> {
-    pub(self) writer: &'ser mut W,
+pub struct Serializer<W: Write> {
+    pub(self) writer: W,
 }
 
-impl<'ser, W: Write> Serializer<'ser, W> {
-    pub fn new(writer: &'ser mut W) -> Self {
+impl<W: Write> Serializer<W> {
+    pub fn new(writer: W) -> Self {
         Self { writer }
     }
 
@@ -262,17 +262,17 @@ impl<'ser, W: Write> Serializer<'ser, W> {
     }
 }
 
-impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
+impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
     type Ok = Value;
     type Error = Error;
 
-    type SerializeSeq = SeqSerializer<'a, 'ser, W>;
-    type SerializeTuple = SeqSerializer<'a, 'ser, W>;
-    type SerializeTupleStruct = SeqSerializer<'a, 'ser, W>;
-    type SerializeTupleVariant = SeqSerializer<'a, 'ser, W>;
-    type SerializeMap = MapSerializer<'a, 'ser, W>;
-    type SerializeStruct = MapSerializer<'a, 'ser, W>;
-    type SerializeStructVariant = MapSerializer<'a, 'ser, W>;
+    type SerializeSeq = SeqSerializer<'a, W>;
+    type SerializeTuple = SeqSerializer<'a, W>;
+    type SerializeTupleStruct = SeqSerializer<'a, W>;
+    type SerializeTupleVariant = SeqSerializer<'a, W>;
+    type SerializeMap = MapSerializer<'a, W>;
+    type SerializeStruct = MapSerializer<'a, W>;
+    type SerializeStructVariant = MapSerializer<'a, W>;
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         let out = if v { Value::True } else { Value::False };
@@ -482,7 +482,7 @@ impl<'a, 'ser, W: Write> serde::Serializer for &'a mut Serializer<'ser, W> {
 /// Serializes the `value` into the `writer`.
 ///
 /// The returned value is the intermediate value that was serialized. It can be ignored.
-pub fn to_writer<W: Write, T: serde::Serialize>(writer: &mut W, value: &T) -> Result<Value, Error> {
+pub fn to_writer(writer: impl Write, value: &impl serde::Serialize) -> Result<Value, Error> {
     let mut serializer = Serializer::new(writer);
     value.serialize(&mut serializer)
 }

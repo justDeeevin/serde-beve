@@ -6,15 +6,15 @@ use serde::{
 };
 use std::io::Read;
 
-pub struct SeqDeserializer<'a, 'de, R: Read> {
-    pub deserializer: &'a mut Deserializer<'de, R>,
+pub struct SeqDeserializer<'a, R: Read> {
+    pub deserializer: &'a mut Deserializer<R>,
     pub len: usize,
     pub index: usize,
     pub kind: ArrayKind,
 }
 
-impl<'a, 'de, R: Read> SeqDeserializer<'a, 'de, R> {
-    pub fn new(deserializer: &'a mut Deserializer<'de, R>, len: usize, kind: ArrayKind) -> Self {
+impl<'a, R: Read> SeqDeserializer<'a, R> {
+    pub fn new(deserializer: &'a mut Deserializer<R>, len: usize, kind: ArrayKind) -> Self {
         Self {
             deserializer,
             len,
@@ -24,7 +24,7 @@ impl<'a, 'de, R: Read> SeqDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> SeqAccess<'de> for SeqDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> SeqAccess<'de> for SeqDeserializer<'a, R> {
     type Error = Error;
 
     fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
@@ -43,7 +43,7 @@ impl<'a, 'de, R: Read> SeqAccess<'de> for SeqDeserializer<'a, 'de, R> {
     }
 }
 
-impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut SeqDeserializer<'a, 'de, R> {
+impl<'a, 'de, R: Read> serde::Deserializer<'de> for &mut SeqDeserializer<'a, R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>

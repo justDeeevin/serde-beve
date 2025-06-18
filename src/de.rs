@@ -9,13 +9,13 @@ use seq::SeqDeserializer;
 use serde::{de::Visitor, forward_to_deserialize_any};
 use std::io::Read;
 
-pub struct Deserializer<'de, R: Read> {
-    reader: &'de mut R,
+pub struct Deserializer<R: Read> {
+    reader: R,
     peek: Option<u8>,
 }
 
-impl<'de, R: Read> Deserializer<'de, R> {
-    pub fn new(reader: &'de mut R) -> Self {
+impl<R: Read> Deserializer<R> {
+    pub fn new(reader: R) -> Self {
         Self { reader, peek: None }
     }
 
@@ -48,7 +48,7 @@ impl<'de, R: Read> Deserializer<'de, R> {
         Ok(bytes)
     }
 
-    fn deserialize_bf16<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_bf16<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
         if self.get_byte()? != BF16 {
             return Err(Error::WrongType {
                 expected: header_name(BF16),
@@ -59,7 +59,7 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_f32(self.get_bf16_value()?)
     }
 
-    fn deserialize_f16<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_f16<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
         if self.get_byte()? != F16 {
             return Err(Error::WrongType {
                 expected: header_name(F16),
@@ -70,7 +70,7 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_f32(self.get_f16_value()?)
     }
 
-    fn deserialize_string_object<V: Visitor<'de>>(
+    fn deserialize_string_object<'de, V: Visitor<'de>>(
         &mut self,
         visitor: V,
     ) -> Result<V::Value, Error> {
@@ -85,7 +85,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::String))
     }
 
-    fn deserialize_i8_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i8_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I8_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(I8_OBJECT),
@@ -97,7 +100,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::I8))
     }
 
-    fn deserialize_i16_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i16_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I16_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(I16_OBJECT),
@@ -109,7 +115,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::I16))
     }
 
-    fn deserialize_i32_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i32_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I32_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(I32_OBJECT),
@@ -121,7 +130,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::I32))
     }
 
-    fn deserialize_i64_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i64_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I64_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(I64_OBJECT),
@@ -133,7 +145,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::I64))
     }
 
-    fn deserialize_i128_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i128_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I128_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(I128_OBJECT),
@@ -145,7 +160,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::I128))
     }
 
-    fn deserialize_u8_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u8_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U8_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(U8_OBJECT),
@@ -157,7 +175,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::U8))
     }
 
-    fn deserialize_u16_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u16_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U16_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(U16_OBJECT),
@@ -169,7 +190,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::U16))
     }
 
-    fn deserialize_u32_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u32_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U32_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(U32_OBJECT),
@@ -181,7 +205,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::U32))
     }
 
-    fn deserialize_u64_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u64_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U64_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(U64_OBJECT),
@@ -193,7 +220,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::U64))
     }
 
-    fn deserialize_u128_object<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u128_object<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U128_OBJECT {
             return Err(Error::WrongType {
                 expected: header_name(U128_OBJECT),
@@ -205,7 +235,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_map(MapDeserializer::new(self, size, ObjectKind::U128))
     }
 
-    fn deserialize_bf16_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_bf16_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != BF16_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(BF16_ARRAY),
@@ -217,7 +250,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::BF16))
     }
 
-    fn deserialize_f16_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_f16_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != F16_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(F16_ARRAY),
@@ -229,7 +265,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::F16))
     }
 
-    fn deserialize_f32_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_f32_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != F32_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(F32_ARRAY),
@@ -241,7 +280,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::F32))
     }
 
-    fn deserialize_f64_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_f64_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != F64_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(F64_ARRAY),
@@ -253,7 +295,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::F64))
     }
 
-    fn deserialize_i8_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i8_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I8_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(I8_ARRAY),
@@ -265,7 +310,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::I8))
     }
 
-    fn deserialize_i16_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i16_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I16_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(I16_ARRAY),
@@ -277,7 +325,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::I16))
     }
 
-    fn deserialize_i32_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i32_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I32_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(I32_ARRAY),
@@ -289,7 +340,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::I32))
     }
 
-    fn deserialize_i64_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i64_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I64_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(I64_ARRAY),
@@ -301,7 +355,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::I64))
     }
 
-    fn deserialize_i128_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_i128_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != I128_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(I128_ARRAY),
@@ -313,7 +370,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::I128))
     }
 
-    fn deserialize_u8_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u8_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U8_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(U8_ARRAY),
@@ -325,7 +385,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::U8))
     }
 
-    fn deserialize_u16_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u16_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U16_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(U16_ARRAY),
@@ -337,7 +400,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::U16))
     }
 
-    fn deserialize_u32_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u32_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U32_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(U32_ARRAY),
@@ -349,7 +415,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::U32))
     }
 
-    fn deserialize_u64_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u64_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U64_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(U64_ARRAY),
@@ -361,7 +430,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::U64))
     }
 
-    fn deserialize_u128_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_u128_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != U128_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(U128_ARRAY),
@@ -373,7 +445,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::U128))
     }
 
-    fn deserialize_bool_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_bool_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != BOOL_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(BOOL_ARRAY),
@@ -385,7 +460,10 @@ impl<'de, R: Read> Deserializer<'de, R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::Boolean))
     }
 
-    fn deserialize_string_array<V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+    fn deserialize_string_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
         if self.get_byte()? != STRING_ARRAY {
             return Err(Error::WrongType {
                 expected: header_name(STRING_ARRAY),
@@ -531,7 +609,7 @@ impl<'de, R: Read> Deserializer<'de, R> {
     }
 }
 
-impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
+impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<R> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -968,9 +1046,7 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<'de, R> {
 }
 
 /// Deserializes the data from the `reader` as `T`.
-pub fn from_reader<'de, R: Read, T: serde::Deserialize<'de>>(
-    reader: &'de mut R,
-) -> Result<T, Error> {
+pub fn from_reader<T: serde::de::DeserializeOwned>(reader: impl Read) -> Result<T, Error> {
     let mut deserializer = Deserializer::new(reader);
     T::deserialize(&mut deserializer)
 }
