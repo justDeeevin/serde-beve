@@ -1,6 +1,12 @@
 use crate::headers::*;
 
 #[derive(Debug, PartialEq)]
+/// An intermediate representation of values used during serialization.
+///
+/// This is a nearly 1:1 mapping to the `HEADER | VALUE` format in which BEVE values are encoded.
+///
+/// Objects are represented as a vector of key-value pairs, and strings are represented as their
+/// bytes.
 pub enum Value {
     Null,
     True,

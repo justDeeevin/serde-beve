@@ -24,6 +24,7 @@ pub mod de;
 pub mod error;
 /// Serialization logic.
 pub mod ser;
+/// Intermediate representation of values used during serialization.
 pub mod value;
 
 mod headers;
