@@ -1,12 +1,14 @@
 mod complex;
 mod enums;
 mod map;
+mod matrix;
 mod seq;
 
 use crate::{Error, error::SpecialType, headers::*};
 use complex::{ComplexArrayDeserializer, ComplexDeserializer, ComplexKind};
 use enums::EnumDeserializer;
 use map::MapDeserializer;
+use matrix::MatrixDeserializer;
 use seq::SeqDeserializer;
 use serde::{de::Visitor, forward_to_deserialize_any};
 use std::io::Read;
@@ -671,6 +673,26 @@ impl<R: Read> Deserializer<R> {
             size,
         ))
     }
+
+    fn deserialize_matrix<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+        match self.get_byte()? {
+            MATRIX => {}
+            header => {
+                return Err(Error::WrongType {
+                    expected: header_name(MATRIX),
+                    found: header_name(header),
+                });
+            }
+        }
+
+        let layout = if self.get_byte()? & 1 == 1 {
+            "layout_right"
+        } else {
+            "layout_left"
+        };
+
+        visitor.visit_map(MatrixDeserializer::new(self, layout.to_string()))
+    }
 }
 
 impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<R> {
@@ -745,7 +767,7 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<R> {
                 visitor.visit_unit()
             }
             TAG => self.deserialize_enum("", &[], visitor),
-            MATRIX => todo!(),
+            MATRIX => self.deserialize_matrix(visitor),
             COMPLEX => self.deserialize_complex(visitor),
 
             RESERVED => Err(Error::Reserved),

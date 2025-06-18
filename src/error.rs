@@ -101,6 +101,10 @@ pub enum Error {
     #[error("Invalid complex header")]
     /// Returned when an invalid complex header is encountered.
     InvalidComplexHeader,
+
+    #[error("Invalid matrix member type")]
+    /// Returned when attempting to deserialize part of a matrix as an improper type.
+    InvalidMatrixType,
 }
 
 #[derive(Debug)]

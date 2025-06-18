@@ -89,7 +89,6 @@ pub enum Value {
     // Box for indirection
     // I hate it here
     Tag(usize, Box<Value>),
-    // TODO
     Matrix,
     Complex,
     Reserved,
