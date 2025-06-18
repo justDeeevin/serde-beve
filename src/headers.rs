@@ -155,6 +155,7 @@ pub enum ArrayKind {
     F16,
     F32,
     F64,
+    Complex,
 }
 
 impl ArrayKind {
@@ -177,6 +178,7 @@ impl ArrayKind {
             Self::F16 => F16,
             Self::F32 => F32,
             Self::F64 => F64,
+            Self::Complex => COMPLEX,
         }
     }
 }
@@ -201,6 +203,7 @@ impl std::fmt::Display for ArrayKind {
             Self::F16 => write!(f, "{}", header_name(F16)),
             Self::F32 => write!(f, "{}", header_name(F32)),
             Self::F64 => write!(f, "{}", header_name(F64)),
+            Self::Complex => write!(f, "{}", header_name(COMPLEX)),
         }
     }
 }
@@ -255,3 +258,19 @@ impl std::fmt::Display for ObjectKind {
         }
     }
 }
+
+const NUM_TYPE_MASK: u8 = 0b11111000;
+
+// Just the bits representing the size of the number
+pub const I8_HEADER: u8 = I8 & NUM_TYPE_MASK;
+pub const I16_HEADER: u8 = I16 & NUM_TYPE_MASK;
+pub const I32_HEADER: u8 = I32 & NUM_TYPE_MASK;
+pub const I64_HEADER: u8 = I64 & NUM_TYPE_MASK;
+pub const I128_HEADER: u8 = I128 & NUM_TYPE_MASK;
+pub const U8_HEADER: u8 = U8 & NUM_TYPE_MASK;
+pub const U16_HEADER: u8 = U16 & NUM_TYPE_MASK;
+pub const U32_HEADER: u8 = U32 & NUM_TYPE_MASK;
+pub const U64_HEADER: u8 = U64 & NUM_TYPE_MASK;
+pub const U128_HEADER: u8 = U128 & NUM_TYPE_MASK;
+pub const F32_HEADER: u8 = F32 & NUM_TYPE_MASK;
+pub const F64_HEADER: u8 = F64 & NUM_TYPE_MASK;

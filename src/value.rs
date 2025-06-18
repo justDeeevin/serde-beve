@@ -91,7 +91,6 @@ pub enum Value {
     Tag(usize, Box<Value>),
     // TODO
     Matrix,
-    // TODO
     Complex,
     Reserved,
 }

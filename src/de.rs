@@ -1,8 +1,10 @@
+mod complex;
 mod enums;
 mod map;
 mod seq;
 
 use crate::{Error, error::SpecialType, headers::*};
+use complex::{ComplexArrayDeserializer, ComplexDeserializer, ComplexKind};
 use enums::EnumDeserializer;
 use map::MapDeserializer;
 use seq::SeqDeserializer;
@@ -607,6 +609,68 @@ impl<R: Read> Deserializer<R> {
         self.reader.read_exact(&mut bytes)?;
         Ok(f64::from_le_bytes(bytes))
     }
+
+    fn deserialize_complex<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
+        match self.get_byte()? {
+            COMPLEX => {}
+            header => {
+                return Err(Error::WrongType {
+                    expected: header_name(COMPLEX),
+                    found: header_name(header),
+                });
+            }
+        }
+
+        let complex_header = self.peek_byte()?;
+        let array = complex_header & 1 == 1;
+        if array {
+            self.deserialize_complex_array(visitor)
+        } else {
+            self.deserialize_complex_number(visitor)
+        }
+    }
+
+    fn get_complex_kind(&mut self) -> Result<ComplexKind, Error> {
+        let header = self.get_byte()?;
+        Ok(match header {
+            I8_HEADER => ComplexKind::I8,
+            I16_HEADER => ComplexKind::I16,
+            I32_HEADER => ComplexKind::I32,
+            I64_HEADER => ComplexKind::I64,
+            I128_HEADER => ComplexKind::I128,
+            U8_HEADER => ComplexKind::U8,
+            U16_HEADER => ComplexKind::U16,
+            U32_HEADER => ComplexKind::U32,
+            U64_HEADER => ComplexKind::U64,
+            U128_HEADER => ComplexKind::U128,
+            F32_HEADER => ComplexKind::F32,
+            F64_HEADER => ComplexKind::F64,
+            _ => {
+                return Err(Error::InvalidComplexHeader);
+            }
+        })
+    }
+
+    fn deserialize_complex_number<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
+        let kind = self.get_complex_kind()?;
+        visitor.visit_seq(ComplexDeserializer::new(self, kind))
+    }
+
+    fn deserialize_complex_array<'de, V: Visitor<'de>>(
+        &mut self,
+        visitor: V,
+    ) -> Result<V::Value, Error> {
+        let kind = self.get_complex_kind()?;
+
+        let size = self.get_size()?;
+        visitor.visit_seq(ComplexArrayDeserializer::new(
+            ComplexDeserializer::new(self, kind),
+            size,
+        ))
+    }
 }
 
 impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<R> {
@@ -682,7 +746,7 @@ impl<'de, R: Read> serde::Deserializer<'de> for &mut Deserializer<R> {
             }
             TAG => self.deserialize_enum("", &[], visitor),
             MATRIX => todo!(),
-            COMPLEX => todo!(),
+            COMPLEX => self.deserialize_complex(visitor),
 
             RESERVED => Err(Error::Reserved),
             header => Err(Error::InvalidHeader(header)),

@@ -97,6 +97,10 @@ pub enum Error {
     #[error("No character")]
     /// Returned when an empty string is attempted to be deserialized as a character.
     NoChar,
+
+    #[error("Invalid complex header")]
+    /// Returned when an invalid complex header is encountered.
+    InvalidComplexHeader,
 }
 
 #[derive(Debug)]
