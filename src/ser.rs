@@ -218,27 +218,27 @@ impl<W: Write> Serializer<W> {
 
             // Never serialized
             #[cfg(feature = "half")]
-            Value::BF16(..) => {}
+            Value::BF16(..) => unreachable!(),
             #[cfg(not(feature = "half"))]
-            Value::BF16 => {}
+            Value::BF16 => unreachable!(),
             #[cfg(feature = "half")]
-            Value::BF16Array(..) => {}
+            Value::BF16Array(..) => unreachable!(),
             #[cfg(not(feature = "half"))]
-            Value::BF16Array => {}
+            Value::BF16Array => unreachable!(),
             #[cfg(feature = "half")]
-            Value::F16(..) => {}
+            Value::F16(..) => unreachable!(),
             #[cfg(not(feature = "half"))]
-            Value::F16 => {}
+            Value::F16 => unreachable!(),
             #[cfg(feature = "half")]
-            Value::F16Array(..) => {}
+            Value::F16Array(..) => unreachable!(),
             #[cfg(not(feature = "half"))]
-            Value::F16Array => {}
+            Value::F16Array => unreachable!(),
             Value::F128
             | Value::F128Array
             | Value::Reserved
             | Value::Complex
             | Value::Matrix
-            | Value::Delimiter => {}
+            | Value::Delimiter => unreachable!(),
         }
 
         Ok(())
