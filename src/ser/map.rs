@@ -8,13 +8,13 @@ use std::io::Write;
 
 pub struct MapSerializer<'a, W: Write> {
     serializer: &'a mut Serializer<W>,
-    pub(self) kind: Option<ObjectKind>,
+    kind: Option<ObjectKind>,
     keys: Vec<Value>,
     values: Vec<Value>,
 }
 
 impl<'a, W: Write> MapSerializer<'a, W> {
-    pub(super) fn new(serializer: &'a mut Serializer<W>, kind: Option<ObjectKind>) -> Self {
+    pub fn new(serializer: &'a mut Serializer<W>, kind: Option<ObjectKind>) -> Self {
         Self {
             serializer,
             kind,
@@ -23,7 +23,7 @@ impl<'a, W: Write> MapSerializer<'a, W> {
         }
     }
 
-    pub(self) fn ensure_kind(&mut self, expected: ObjectKind) -> Result<(), Error> {
+    fn ensure_kind(&mut self, expected: ObjectKind) -> Result<(), Error> {
         match self.kind {
             None => self.kind = Some(expected),
             Some(found) => {

@@ -479,8 +479,8 @@ impl<R: Read> Deserializer<R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::String))
     }
 
-    fn get_size(&mut self) -> Result<usize, Error> {
         let mut first = self.get_byte()?;
+    pub(self) fn get_size(&mut self) -> Result<usize, Error> {
         let n_bytes = 2_usize.pow((first & 0b11) as u32);
 
         first >>= 2;

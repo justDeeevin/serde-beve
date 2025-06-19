@@ -8,7 +8,7 @@ use std::io::Write;
 
 pub struct SeqSerializer<'a, W: Write> {
     serializer: &'a mut Serializer<W>,
-    pub kind: Option<ArrayKind>,
+    kind: Option<ArrayKind>,
     elements: Vec<Value>,
 }
 
@@ -21,7 +21,7 @@ impl<'a, W: Write> SeqSerializer<'a, W> {
         }
     }
 
-    pub(self) fn update_type(&mut self, new: ArrayKind) {
+    fn update_type(&mut self, new: ArrayKind) {
         match self.kind {
             None => self.kind = Some(new),
             Some(ArrayKind::Generic) => {}
@@ -33,7 +33,7 @@ impl<'a, W: Write> SeqSerializer<'a, W> {
         }
     }
 
-    pub(self) fn ensure_generic(&mut self) {
+    fn ensure_generic(&mut self) {
         if self.kind != Some(ArrayKind::Generic) {
             self.kind = Some(ArrayKind::Generic);
         }
