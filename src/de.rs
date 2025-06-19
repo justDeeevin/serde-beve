@@ -479,14 +479,12 @@ impl<R: Read> Deserializer<R> {
         visitor.visit_seq(SeqDeserializer::new(self, size, ArrayKind::String))
     }
 
-        let mut first = self.get_byte()?;
     pub(self) fn get_size(&mut self) -> Result<usize, Error> {
+        let first = self.get_byte()?;
         let n_bytes = 2_usize.pow((first & 0b11) as u32);
 
-        first >>= 2;
-
         if n_bytes == 1 {
-            return Ok(first as usize);
+            return Ok((first as usize) >> 2);
         }
 
         let mut rest = vec![0; n_bytes - 1];
@@ -508,7 +506,7 @@ impl<R: Read> Deserializer<R> {
             bytes[i + 1] = byte;
         }
 
-        Ok(usize::from_le_bytes(bytes))
+        Ok(usize::from_le_bytes(bytes) >> 2)
     }
 
     pub(self) fn get_string_value(&mut self) -> Result<String, Error> {
