@@ -81,6 +81,9 @@ pub enum Value {
     U64Array(Vec<u64>),
     U128Array(Vec<u128>),
 
+    /// Note that field 1 constains [`u8`]s rather than [`bool`]s. This is because it is meant to
+    /// be written directly to a writer during serialization, where each bit within each byte
+    /// represents a true or false value.
     BoolArray(usize, Vec<u8>),
     StringArray(Vec<Vec<u8>>),
     GenericArray(Vec<Value>),
