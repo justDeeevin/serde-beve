@@ -16,6 +16,17 @@ impl<W: Write> Serializer<W> {
         Self { writer }
     }
 
+    fn serialize_num_array<T: Copy, const N: usize>(
+        &mut self,
+        v: &[T],
+        f: fn(T) -> [u8; N],
+    ) -> Result<(), Error> {
+        self.serialize_size(v.len())?;
+        let bytes = v.iter().flat_map(|v| f(*v)).collect::<Vec<_>>();
+        self.writer.write_all(&bytes)?;
+        Ok(())
+    }
+
     fn serialize_size(&mut self, mut size: usize) -> Result<(), Error> {
         if size >= 2_usize.pow(62) {
             return Err(Error::TooLong);
@@ -62,16 +73,12 @@ impl<W: Write> Serializer<W> {
             Value::F32(v) => self.writer.write_all(&v.to_le_bytes())?,
             Value::F64(v) => self.writer.write_all(&v.to_le_bytes())?,
 
-            Value::String(v) => {
-                self.serialize_size(v.len())?;
-                self.writer.write_all(v)?;
-            }
+            Value::String(v) => self.serialize_str_value(v)?,
 
             Value::StringObject(v) => {
                 self.serialize_size(v.len())?;
                 for (k, v) in v {
-                    self.serialize_size(k.len())?;
-                    self.writer.write_all(k)?;
+                    self.serialize_str_value(k)?;
                     self.serialize_value(v)?;
                 }
             }
@@ -149,66 +156,42 @@ impl<W: Write> Serializer<W> {
             }
 
             Value::F32Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, f32::to_le_bytes)?;
             }
             Value::F64Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, f64::to_le_bytes)?;
             }
 
             Value::I8Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, i8::to_le_bytes)?;
             }
             Value::I16Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, i16::to_le_bytes)?;
             }
             Value::I32Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, i32::to_le_bytes)?;
             }
             Value::I64Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, i64::to_le_bytes)?;
             }
             Value::I128Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, i128::to_le_bytes)?;
             }
 
             Value::U8Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, u8::to_le_bytes)?;
             }
             Value::U16Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, u16::to_le_bytes)?;
             }
             Value::U32Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, u32::to_le_bytes)?;
             }
             Value::U64Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, u64::to_le_bytes)?;
             }
             Value::U128Array(v) => {
-                self.serialize_size(v.len())?;
-                let bytes = v.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>();
-                self.writer.write_all(&bytes)?;
+                self.serialize_num_array(v, u128::to_le_bytes)?;
             }
 
             Value::BoolArray(len, v) => {

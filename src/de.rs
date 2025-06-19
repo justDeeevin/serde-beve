@@ -520,64 +520,53 @@ impl<R: Read> Deserializer<R> {
         self.get_byte()
     }
 
-    pub(self) fn get_u16_value(&mut self) -> Result<u16, Error> {
-        let mut bytes = [0; 2];
+    fn get_num_value<T, const N: usize>(&mut self, f: fn([u8; N]) -> T) -> Result<T, Error> {
+        let mut bytes = [0; N];
         self.reader.read_exact(&mut bytes)?;
-        Ok(u16::from_le_bytes(bytes))
+        Ok(f(bytes))
+    }
+
+    pub(self) fn get_u16_value(&mut self) -> Result<u16, Error> {
+        self.get_num_value(u16::from_le_bytes)
     }
 
     pub(self) fn get_u32_value(&mut self) -> Result<u32, Error> {
-        let mut bytes = [0; 4];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(u32::from_le_bytes(bytes))
+        self.get_num_value(u32::from_le_bytes)
     }
 
     pub(self) fn get_u64_value(&mut self) -> Result<u64, Error> {
-        let mut bytes = [0; 8];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(u64::from_le_bytes(bytes))
+        self.get_num_value(u64::from_le_bytes)
     }
 
     pub(self) fn get_u128_value(&mut self) -> Result<u128, Error> {
-        let mut bytes = [0; 16];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(u128::from_le_bytes(bytes))
+        self.get_num_value(u128::from_le_bytes)
     }
 
     pub(self) fn get_i8_value(&mut self) -> Result<i8, Error> {
-        Ok(i8::from_le_bytes([self.get_byte()?]))
+        self.get_num_value(i8::from_le_bytes)
     }
 
     pub(self) fn get_i16_value(&mut self) -> Result<i16, Error> {
-        let mut bytes = [0; 2];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(i16::from_le_bytes(bytes))
+        self.get_num_value(i16::from_le_bytes)
     }
 
     pub(self) fn get_i32_value(&mut self) -> Result<i32, Error> {
-        let mut bytes = [0; 4];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(i32::from_le_bytes(bytes))
+        self.get_num_value(i32::from_le_bytes)
     }
 
     pub(self) fn get_i64_value(&mut self) -> Result<i64, Error> {
-        let mut bytes = [0; 8];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(i64::from_le_bytes(bytes))
+        self.get_num_value(i64::from_le_bytes)
     }
 
     pub(self) fn get_i128_value(&mut self) -> Result<i128, Error> {
-        let mut bytes = [0; 16];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(i128::from_le_bytes(bytes))
+        self.get_num_value(i128::from_le_bytes)
     }
 
     pub(self) fn get_bf16_value(&mut self) -> Result<f32, Error> {
         #[cfg(feature = "half")]
         {
-            let mut bytes = [0; 2];
-            self.reader.read_exact(&mut bytes)?;
-            Ok(half::bf16::from_le_bytes(bytes).to_f32())
+            self.get_num_value(half::bf16::from_le_bytes)
+                .map(|v| v.to_f32())
         }
         #[cfg(not(feature = "half"))]
         {
@@ -588,9 +577,8 @@ impl<R: Read> Deserializer<R> {
     pub(self) fn get_f16_value(&mut self) -> Result<f32, Error> {
         #[cfg(feature = "half")]
         {
-            let mut bytes = [0; 2];
-            self.reader.read_exact(&mut bytes)?;
-            Ok(half::f16::from_le_bytes(bytes).to_f32())
+            self.get_num_value(half::f16::from_le_bytes)
+                .map(|v| v.to_f32())
         }
         #[cfg(not(feature = "half"))]
         {
@@ -599,15 +587,11 @@ impl<R: Read> Deserializer<R> {
     }
 
     pub(self) fn get_f32_value(&mut self) -> Result<f32, Error> {
-        let mut bytes = [0; 4];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(f32::from_le_bytes(bytes))
+        self.get_num_value(f32::from_le_bytes)
     }
 
     pub(self) fn get_f64_value(&mut self) -> Result<f64, Error> {
-        let mut bytes = [0; 8];
-        self.reader.read_exact(&mut bytes)?;
-        Ok(f64::from_le_bytes(bytes))
+        self.get_num_value(f64::from_le_bytes)
     }
 
     fn deserialize_complex<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
@@ -621,18 +605,9 @@ impl<R: Read> Deserializer<R> {
             }
         }
 
-        let complex_header = self.peek_byte()?;
+        let complex_header = self.get_byte()?;
         let array = complex_header & 1 == 1;
-        if array {
-            self.deserialize_complex_array(visitor)
-        } else {
-            self.deserialize_complex_number(visitor)
-        }
-    }
-
-    fn get_complex_kind(&mut self) -> Result<ComplexKind, Error> {
-        let header = self.get_byte()?;
-        Ok(match header {
+        let kind = match complex_header {
             I8_HEADER => ComplexKind::I8,
             I16_HEADER => ComplexKind::I16,
             I32_HEADER => ComplexKind::I32,
@@ -648,28 +623,16 @@ impl<R: Read> Deserializer<R> {
             _ => {
                 return Err(Error::InvalidComplexHeader);
             }
-        })
-    }
-
-    fn deserialize_complex_number<'de, V: Visitor<'de>>(
-        &mut self,
-        visitor: V,
-    ) -> Result<V::Value, Error> {
-        let kind = self.get_complex_kind()?;
-        visitor.visit_seq(ComplexDeserializer::new(self, kind))
-    }
-
-    fn deserialize_complex_array<'de, V: Visitor<'de>>(
-        &mut self,
-        visitor: V,
-    ) -> Result<V::Value, Error> {
-        let kind = self.get_complex_kind()?;
-
-        let size = self.get_size()?;
-        visitor.visit_seq(ComplexArrayDeserializer::new(
-            ComplexDeserializer::new(self, kind),
-            size,
-        ))
+        };
+        if array {
+            let size = self.get_size()?;
+            visitor.visit_seq(ComplexArrayDeserializer::new(
+                ComplexDeserializer::new(self, kind),
+                size,
+            ))
+        } else {
+            visitor.visit_seq(ComplexDeserializer::new(self, kind))
+        }
     }
 
     fn deserialize_matrix<'de, V: Visitor<'de>>(&mut self, visitor: V) -> Result<V::Value, Error> {
