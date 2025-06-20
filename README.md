@@ -4,7 +4,7 @@ A Serde data format for [BEVE](https://github.com/beve-org/beve).
 
 ## 16-bit floats
 
-BEVE supports both `f16`s and [brain floats](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format). This crate supports the deserialization of both, converting them into `f32`s. However, similar to [extension types](https://github.com/beve-org/beve/blob/main/extensions.md), Serde provides no means of serializing these types, and as such **their deserialization is gated by the `half` feature**, which enables the use of the `half` crate for working with them.
+BEVE supports both `f16`s and [brain floats](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format). This crate supports the deserialization of both, converting them into `f32`s. However, similar to [extension types](https://github.com/beve-org/beve/blob/main/extensions.md), Serde provides no means of serializing these types, and as such **their deserialization is gated by the `half` feature**, which enables the use of the (`half`)[https://crates.io/crates/half] crate for working with them.
 
 ## Notes
 
