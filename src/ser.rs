@@ -469,3 +469,10 @@ pub fn to_writer(writer: impl Write, value: &impl serde::Serialize) -> Result<Va
     let mut serializer = Serializer::new(writer);
     value.serialize(&mut serializer)
 }
+
+/// Serializes the `value` into a `Vec<u8>`.
+pub fn to_bytes(value: &impl serde::Serialize) -> Result<Vec<u8>, Error> {
+    let mut writer = Vec::new();
+    to_writer(&mut writer, value)?;
+    Ok(writer)
+}

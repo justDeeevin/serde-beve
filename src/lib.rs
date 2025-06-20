@@ -32,5 +32,5 @@ mod headers;
 pub use de::{Deserializer, from_bytes, from_reader};
 pub use error::{Error, Result};
 pub use headers::{ArrayKind, ObjectKind};
-pub use ser::{Serializer, to_writer};
+pub use ser::{Serializer, to_bytes, to_writer};
 pub use value::Value;
