@@ -42,6 +42,7 @@ impl<'a, 'de, R: Read> MapAccess<'de> for MapDeserializer<'a, R> {
     where
         V: serde::de::DeserializeSeed<'de>,
     {
+        self.index += 1;
         seed.deserialize(&mut *self.deserializer)
     }
 }

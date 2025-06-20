@@ -35,6 +35,8 @@ impl<'a, 'de, R: Read> SeqAccess<'de> for SeqDeserializer<'a, R> {
             return Ok(None);
         }
 
+        self.index += 1;
+
         seed.deserialize(self).map(Some)
     }
 
