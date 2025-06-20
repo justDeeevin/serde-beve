@@ -2,7 +2,7 @@
 name = "serde-beve"
 authors = ["Devin Droddy <devin.droddy@gmail.com>"]
 categories = ["encoding", "parser-implementations"]
-version = "1.0.0-alpha.3"
+version = "1.0.0"
 edition = "2024"
 description = "A BEVE data format for Serde"
 license = "MIT"
