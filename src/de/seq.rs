@@ -7,10 +7,10 @@ use serde::{
 use std::io::Read;
 
 pub struct SeqDeserializer<'a, R: Read> {
-    pub deserializer: &'a mut Deserializer<R>,
-    pub len: usize,
-    pub index: usize,
-    pub kind: ArrayKind,
+    deserializer: &'a mut Deserializer<R>,
+    len: usize,
+    index: usize,
+    kind: ArrayKind,
 }
 
 impl<'a, R: Read> SeqDeserializer<'a, R> {

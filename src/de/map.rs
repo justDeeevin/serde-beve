@@ -7,10 +7,10 @@ use serde::{
 use std::io::Read;
 
 pub struct MapDeserializer<'a, R: Read> {
-    pub deserializer: &'a mut Deserializer<R>,
-    pub len: usize,
-    pub index: usize,
-    pub kind: ObjectKind,
+    deserializer: &'a mut Deserializer<R>,
+    len: usize,
+    index: usize,
+    kind: ObjectKind,
 }
 
 impl<'a, R: Read> MapDeserializer<'a, R> {
