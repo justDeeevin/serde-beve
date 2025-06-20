@@ -14,6 +14,7 @@ pub struct SeqSerializer<'a, W: Write> {
 
 impl<'a, W: Write> SeqSerializer<'a, W> {
     pub fn new(serializer: &'a mut Serializer<W>) -> Self {
+        serializer.write = false;
         Self {
             serializer,
             kind: None,
@@ -203,6 +204,7 @@ impl<'a, W: Write> SerializeSeq for SeqSerializer<'a, W> {
             Some(ArrayKind::Complex) => unreachable!(),
         };
 
+        self.serializer.write = true;
         self.serializer.serialize_value(&out)?;
         Ok(out)
     }
@@ -270,67 +272,67 @@ impl<'a, 'b, W: Write> serde::Serializer for &'b mut SeqSerializer<'a, W> {
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::Boolean);
-        Ok(if v { Value::True } else { Value::False })
+        self.serializer.serialize_bool(v)
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::I8);
-        Ok(Value::I8(v))
+        self.serializer.serialize_i8(v)
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::I16);
-        Ok(Value::I16(v))
+        self.serializer.serialize_i16(v)
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::I32);
-        Ok(Value::I32(v))
+        self.serializer.serialize_i32(v)
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::I64);
-        Ok(Value::I64(v))
+        self.serializer.serialize_i64(v)
     }
 
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::I128);
-        Ok(Value::I128(v))
+        self.serializer.serialize_i128(v)
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::U8);
-        Ok(Value::U8(v))
+        self.serializer.serialize_u8(v)
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::U16);
-        Ok(Value::U16(v))
+        self.serializer.serialize_u16(v)
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::U32);
-        Ok(Value::U32(v))
+        self.serializer.serialize_u32(v)
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::U64);
-        Ok(Value::U64(v))
+        self.serializer.serialize_u64(v)
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::U128);
-        Ok(Value::U128(v))
+        self.serializer.serialize_u128(v)
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::F32);
-        Ok(Value::F32(v))
+        self.serializer.serialize_f32(v)
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::F64);
-        Ok(Value::F64(v))
+        self.serializer.serialize_f64(v)
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
@@ -339,7 +341,7 @@ impl<'a, 'b, W: Write> serde::Serializer for &'b mut SeqSerializer<'a, W> {
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
         self.update_type(ArrayKind::String);
-        Ok(Value::String(v.bytes().collect()))
+        self.serializer.serialize_str(v)
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {

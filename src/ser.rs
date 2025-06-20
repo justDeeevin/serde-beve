@@ -8,12 +8,16 @@ use crate::{Value, error::Error, headers::*};
 use std::io::Write;
 
 pub struct Serializer<W: Write> {
-    pub(self) writer: W,
+    writer: W,
+    write: bool,
 }
 
 impl<W: Write> Serializer<W> {
     pub fn new(writer: W) -> Self {
-        Self { writer }
+        Self {
+            writer,
+            write: true,
+        }
     }
 
     fn serialize_num_array<T: Copy, const N: usize>(
@@ -259,76 +263,102 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         let out = if v { Value::True } else { Value::False };
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
         let out = Value::I8(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
         let out = Value::I16(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
         let out = Value::I32(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
         let out = Value::I64(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
         let out = Value::I128(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         let out = Value::U8(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
         let out = Value::U16(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
         let out = Value::U32(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
         let out = Value::U64(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
         let out = Value::U128(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
         let out = Value::F32(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
         let out = Value::F64(v);
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
@@ -338,14 +368,18 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
         let out = Value::String(v.bytes().collect());
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
         // TODO: avoid copying?
         let out = Value::U8Array(v.to_vec());
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
@@ -361,7 +395,9 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        self.serialize_value(&Value::Null)?;
+        if self.write {
+            self.serialize_value(&Value::Null)?;
+        }
         Ok(Value::Null)
     }
 
@@ -376,7 +412,9 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
         let out = Value::Tag(variant_index as usize, Box::new(Value::Null));
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
@@ -405,7 +443,9 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
             variant_index as usize,
             Box::new(value.serialize(&mut *self)?),
         );
-        self.serialize_value(&out)?;
+        if self.write {
+            self.serialize_value(&out)?;
+        }
         Ok(out)
     }
 
@@ -432,8 +472,10 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        self.writer.write_all(&[TAG])?;
-        self.serialize_size(variant_index as usize)?;
+        if self.write {
+            self.writer.write_all(&[TAG])?;
+            self.serialize_size(variant_index as usize)?;
+        }
         self.serialize_seq(Some(len))
     }
 
@@ -456,8 +498,10 @@ impl<'a, W: Write> serde::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        self.writer.write_all(&[TAG])?;
-        self.serialize_size(variant_index as usize)?;
+        if self.write {
+            self.writer.write_all(&[TAG])?;
+            self.serialize_size(variant_index as usize)?;
+        }
         self.serialize_struct("", len)
     }
 }
